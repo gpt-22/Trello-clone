@@ -26,6 +26,18 @@ function onOverList(e) {
     beforeElement === null ? this.childNodes[3].appendChild(dragging) : this.childNodes[3].insertBefore(dragging, beforeElement)
 }
 
+function cardOnDragStart(e) {
+    e.stopPropagation()
+    board.removeEventListener('dragover', onOverBoard);
+    this.classList.add('dragging')
+}
+
+function cardOnDragEnd(e) {
+    e.stopPropagation()
+    board.addEventListener('dragover', onOverBoard)
+    this.classList.remove('dragging')
+}
+
 
 // Drag & Drop for lists
 
@@ -67,56 +79,51 @@ lists.forEach(list => {
 })
 
 cards.forEach(card => { 
-    card.addEventListener('dragstart', (e) => {
-        e.stopPropagation()
-        board.removeEventListener('dragover', onOverBoard);
-        card.classList.add('dragging')
-    })
-    card.addEventListener('dragend', (e) => {
-        e.stopPropagation()
-        board.addEventListener('dragover', onOverBoard)
-        card.classList.remove('dragging')
-    })
+    card.addEventListener('dragstart', cardOnDragStart)
+    card.addEventListener('dragend', cardOnDragEnd)
 })
 
 
 // CRUD card
 
-const createOrDelete = function () {
-    if (this.value !== '') {
+function isValidCardTitle(titleText) {
+    const NUM = '1234567890'
+    const ENG = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    const RUS = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'
+    const char = titleText.trim()[0]
+    return ENG.includes(char) || RUS.includes(char) || NUM.includes(char)
+}
+
+function createCardOrDeleteTextArea() {
+    if (isValidCardTitle(this.value)) {
         this.parentNode.insertAdjacentHTML('beforeEnd', `
             <div class=\"list__item card\" draggable=\"true\">
                 ${this.value}
             </div>
         `)
-        const siblings = this.parentNode.childNodes
+        const siblings = this.parentNode.children
         const createdCard = siblings[siblings.length - 1]
-        createdCard.addEventListener("dragstart", dragStart) 
-        createdCard.addEventListener("dragend", dragEnd) 
+        createdCard.addEventListener('dragstart', cardOnDragStart) 
+        createdCard.addEventListener('dragend', cardOnDragEnd) 
     } 
     this.parentNode.removeChild(this)
 }
 
-const addCard = function() {
-    // list__body -> inser "input card" -> handle onenter and 
-    // onclick btn
- 
+function showCardTitleTextArea() {
     const listBody = this.parentElement.parentElement.childNodes[3]
     listBody.insertAdjacentHTML('beforeEnd',`
         <textarea class=\"add-card-text\" name=\"\" id=\"\" rows=\"3\" placeholder=\"Введите заголовок для этой карточки\"></textarea>
     `)
-
-    // it's always the only one element in document
-    const textarea = document.querySelector('.add-card-text')
-    textarea.addEventListener('blur', createOrDelete, false)
+    const textarea = document.querySelector('.add-card-text') // it's always a single element in document
+    textarea.addEventListener('keyup', (e) => (e.keyCode === 13) ? textarea.blur() : {})
+    textarea.addEventListener('blur', createCardOrDeleteTextArea)
     textarea.focus()
 }
-
 
 const addCardBtns = document.querySelectorAll('.add-card-btn')
 
 addCardBtns.forEach(btn => {
-    btn.addEventListener('click', addCard)
+    btn.addEventListener('click', showCardTitleTextArea)
 })
 
 
