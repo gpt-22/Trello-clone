@@ -1,8 +1,5 @@
 // Vars
 
-const $ = {} // for including custom plugins
-
-
 const board = document.querySelector('.board')
 const addListBlock = board.querySelector('.add-list-block')
 const showFormBtn = addListBlock.querySelector('.show-form-btn')
@@ -16,37 +13,43 @@ const data = {
     lists: [
         {
             id: 1,
-            title: 'Super list 1',
+            title: 'Какой-то список 1',
             cards: [
                 {
-                    title: 'Card 1'
+                    title: 'Карточка 1',
+                    description: 'Описание 1',
                 },
                 {
-                    title: 'Card 2'
+                    title: 'Карточка 2',
+                    description: 'Описание 2',
                 },
                 {
-                    title: 'Card 3'
+                    title: 'Карточка 3',
+                    description: 'Описание 3',
                 },
             ]
         },
         {
             id: 2,
-            title: 'Super list 2',
+            title: 'Какой-то список 2',
             cards: [
                 {
-                    title: 'Card 4'
+                    title: 'Карточка 4',
+                    description: 'Описание 4',
                 },
             ]
         },
         {
             id: 3,
-            title: 'Super list 3',
+            title: 'Какой-то список 3',
             cards: [
                 {
-                    title: 'Card 5'
+                    title: 'Карточка 5',
+                    description: 'Описание 5',
                 },
                 {
-                    title: 'Card 6'
+                    title: 'Карточка 6',
+                    description: 'Описание 6',
                 },
             ]
         },
@@ -90,6 +93,22 @@ function render() {
 }
 
 render()
+
+
+// Card modal
+
+// optimized way to listen click on card instead of adding many eventListeners
+document.addEventListener('click', e => {
+    e.preventDefault()
+    
+    if (e.target.classList.contains('card')) {
+        const listID = e.target.parentNode.parentNode.id
+        const list = data.lists.filter( list => list.id === +listID.slice(-1) )[0]
+        const card = list.cards.filter( card => card.title === e.target.innerText )[0]
+        const cardModal = $.modal(card)
+        cardModal.open()
+    }
+})
 
 
 // Drag & Drop for cards
@@ -171,7 +190,6 @@ function addListEvents(list) {
 function addCardEvents(card) {
     card.addEventListener('dragstart', cardOnDragStart)
     card.addEventListener('dragend', cardOnDragEnd)
-    card.addEventListener('click', () => console.log(1))
 }
 
 
@@ -315,14 +333,15 @@ addListBtn.addEventListener('click', addListOrHideListInput)
 * drag&drop card +
 * drag&drop list +
 * create card +
+* create list +
+* render lists and cards + 
+* on click card show modal with card details +
 * delete card
-* update card: title
+* update card title
 * mark card as done
 * add/remove check-list 
 * add/remove date 
 * add/remove comment
-* create list +
 * delete list 
 * update list
-* render lists and cards
 **/

@@ -1,3 +1,2 @@
-// file for including custom plugins
 
-const $ = {}
+const $ = {} // for including custom plugins

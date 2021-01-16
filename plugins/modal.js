@@ -5,20 +5,20 @@ function _createModal(options) {
     const modal = document.createElement('div')
     modal.classList.add('modal')
     modal.insertAdjacentHTML('afterbegin', `
-    <div class="modal-overlay" data-close="true">
-        <div class="modal-container">
-            <div class="modal-header">
-                <input class="modal-title" type="text" placeholder="Название карточки" 
-                value="${ options.hasOwnProperty('title') ? options.title : 'Название карточки' }">
-                ${ options.closable ? `<span class="modal-close" data-close="true">&#10006;</span>` : '' }
-            </div>
-            <div class="modal-body">
-                <div class="modal-description" data-content>
-                    ${ options.content ? options.content : '' }
+        <div class="modal-overlay" data-close="true">
+            <div class="modal-container">
+                <div class="modal-header">
+                    <input class="modal-title" type="text" placeholder="Название карточки" 
+                    value="${ options.hasOwnProperty('title') ? options.title : 'Название карточки' }">
+                    <span class="modal-close" data-close="true">&#10006;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-description" data-content>
+                        ${ options.description ? options.description : '' }
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>    
+        </div>    
     `)
     document.body.appendChild(modal)
 
@@ -59,7 +59,7 @@ $.modal = function(options) {
             isDestroyed = true
         },
         setHTML(html){
-            $modalNode.querySelector('[data-content]').innerHTML = html
+            $modalNode.querySelector('[data-description]').innerHTML = html
         }
     })
 }
