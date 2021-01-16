@@ -13,8 +13,49 @@ function _createModal(options) {
                     <span class="modal-close" data-close="true">&#10006;</span>
                 </div>
                 <div class="modal-body">
-                    <div class="modal-description" data-content>
-                        ${ options.description ? options.description : '' }
+                    <div class="modal-col modal-col-left">
+                        <div class="modal-desc-block">
+                            <span class="modal-desc-title">Описание</span>
+                            <textarea class="modal-description" value="${ options.description ? options.description : '' }" 
+                                placeholder="Добавьте более подробное описание..." data-desc></textarea>
+                        </div>
+
+                        <div class="modal-checklist-block">
+                            <div class="modal-checklist-header">
+                                <span class="modal-checklist-title">Чек-лист</span>
+                                <button type="button" class="modal-btn modal-del-checklist-btn">Удалить</button>
+                            </div>
+                            
+                            <div class="modal-checklist-body">
+                                <div class="modal-progress-body"></div>
+                                <div class="modal-checklist-list-container">
+                                    <ul class="modal-checklist-list">
+                                        <li class="modal-checklist-list-item">1</li>
+                                        <li class="modal-checklist-list-item">2</li>
+                                        <li class="modal-checklist-list-item">3</li>    
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="modal-checklist-footer">
+                    
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="modal-col modal-col-right">
+                        <div class="modal-add-block">
+                            <span class="modal-add-title">Добавить на карточку</span>
+                            <button type="button" class="modal-btn modal-mark-btn">Метку</button>
+                            <button type="button" class="modal-btn modal-checklist-btn">Чек-лист</button>
+                            <button type="button" class="modal-btn modal-datetime-btn">Срок</button>    
+                        </div>
+                        <div class="modal-actions-block">
+                            <span class="modal-actions-title">Действия</span>
+                            <button type="button" class="modal-btn modal-move-btn">Переместить</button>
+                            <button type="button" class="modal-btn modal-copy-btn">Копировать</button>
+                            <button type="button" class="modal-btn modal-delete-btn">Удалить</button>    
+                        </div>
                     </div>
                 </div>
             </div>
@@ -59,7 +100,7 @@ $.modal = function(options) {
             isDestroyed = true
         },
         setHTML(html){
-            $modalNode.querySelector('[data-description]').innerHTML = html
+            $modalNode.querySelector('[data-desc]').innerHTML = html
         }
     })
 }

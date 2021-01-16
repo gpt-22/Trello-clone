@@ -339,9 +339,9 @@ addListBtn.addEventListener('click', addListOrHideListInput)
 * delete card
 * update card title
 * mark card as done
-* add/remove check-list 
+* add/remove description
 * add/remove date 
-* add/remove comment
+* add/remove check-list 
 * delete list 
 * update list
 **/
