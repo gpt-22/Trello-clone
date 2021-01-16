@@ -1,8 +1,19 @@
 // Vars
 
+const $ = {} // for including custom plugins
+
+let listCounter = 3
+
 const board = document.querySelector('.board')
-const lists = document.querySelectorAll('.list')
-const cards = document.querySelectorAll('.card')
+let lists = board.querySelectorAll('.list')
+let cards = board.querySelectorAll('.card')
+
+const addListBlock = board.querySelector('.add-list-block')
+const showFormBtn = addListBlock.querySelector('.show-form-btn')
+const addListForm = addListBlock.querySelector('.add-list-form')
+const formInput = addListBlock.querySelector('.add-list-input')
+const addListBtn = addListBlock.querySelector('.add-list-btn')
+const cancelBtn = addListBlock.querySelector('.add-list-cancel-btn')
 
 
 // Drag & Drop for cards
@@ -87,7 +98,7 @@ cards.forEach(card => {
 
 // create card
 
-function isValidCardTitle(titleText) {
+function isValidTitle(titleText) {
     const NUM = '1234567890'
     const ENG = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
     const RUS = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'
@@ -111,7 +122,7 @@ function createCard(title) {
 function addCardOrHideTextArea() {
     const listBody = this.parentNode
         
-    if (isValidCardTitle(this.value)) {
+    if (isValidTitle(this.value)) {
         const newCard = createCard(this.value)
         listBody.insertBefore(newCard, this)
         this.value = ''
@@ -147,41 +158,86 @@ addCardBtns.forEach(btn => btn.addEventListener('click', addTextArea))
 // create list
 
 function showAddListForm() {
-    addListBlock.innerHTML = `
-        <form action="" class="add-list-form">
-            <input type="text" class="add-list-input" placeholder="Заголовок списка">
-            <div class="add-list-form-controls">
-                <button class="add-list-form-btn" type="submit">Добавить список</button>
-                <button class="add-list-cancel-btn">&#10006;</button>
-            </div>
-        </form>
-    `
-    formInput = addListBlock.querySelector('.add-list-input')
+    showFormBtn.style.display = 'none'
+    addListForm.style.display = 'block'
     formInput.focus()
-    cancelBtn = addListBlock.querySelector('.add-list-cancel-btn')
-    cancelBtn.addEventListener('click', hideAddListForm)
+    addListForm.addEventListener('submit', e => e.preventDefault()) // prevent reloading if in input enter is pressed
+    formInput.addEventListener('keyup', e => (e.keyCode === 13) ? addListOrHideListInput() : {})
+    document.addEventListener('click', closeAddListForm)
 }
 
 
 function hideAddListForm() {
-    addListBlock.innerHTML = `
-        <button class="add-list-btn">
-            <svg width="16" height="16" fill="#fff" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" data-svg="plus">
-                <rect x="9" y="1" width="2" height="17"></rect><rect x="1" y="9" width="17" height="2"></rect>
-            </svg>
-            Добавить колонку
-        </button>
-    `
-    addListBtn = addListBlock.querySelector('.add-list-btn')
-    addListBtn.addEventListener('click', showAddListForm)
+    showFormBtn.style.display = 'block'
+    addListForm.style.display = 'none'    
+    document.removeEventListener('click', closeAddListForm)
 }
 
 
-const addListBlock = document.querySelector('.add-list-block')
-addListBlock.querySelector('.add-list-btn').addEventListener('click', showAddListForm)
-// on click hide form
-// validate input to create list
+const closeAddListForm = e => document.activeElement !== formInput ? hideAddListForm() : ''
 
+
+function createList(title) {
+
+    listCounter++
+
+    const listHTML = `
+        <div class="list__header">
+            <input type="text" class="list__title" value="${ title }">
+            <div class="list__options">
+                <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" data-svg="more">
+                    <circle cx= "5" cy="10" r="1.2"></circle><circle cx= "10" cy="10" r="1.2"></circle><circle cx="15" cy="10" r="1.2"></circle>
+                </svg>                
+            </div>
+        </div>
+        <div class="list__body">
+        </div>
+        <div class="list__footer">
+            <button class="add-card-btn">
+                <svg width="16" height="16" fill="#888" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" data-svg="plus">
+                    <rect x="9" y="1" width="2" height="17" rx="2"></rect><rect x="1" y="9" width="17" height="2" rx="2"></rect>
+                </svg>    
+            </button>
+        </div>
+    `
+    const list = document.createElement('div')
+    list.id = listCounter
+    list.className += 'list'
+    list.setAttribute('draggable', 'true')
+    list.innerHTML = listHTML
+    list.addEventListener('dragover', onOverList)
+    list.addEventListener('dragstart', () => {
+        lists.forEach(list => list.removeEventListener('dragover', onOverList))
+        console.log('start');
+        list.classList.add('dragging-list')
+    })
+    list.addEventListener('dragend', () => { 
+        list.classList.remove('dragging-list')
+        lists.forEach(list => list.addEventListener('dragover', onOverList))
+    })
+    list.querySelector('.add-card-btn').addEventListener('click', addTextArea)
+
+    return list
+}
+
+
+function addListOrHideListInput() {
+    if (isValidTitle(formInput.value)) {
+        const newList = createList(formInput.value)
+        board.insertBefore(newList, addListBlock)
+        board.scrollLeft = board.scrollWidth
+
+        lists = document.querySelectorAll('.list')
+        formInput.value = ''
+        formInput.focus()
+    }
+}
+
+
+addListBlock.addEventListener('click', () => formInput.focus())
+showFormBtn.addEventListener('click', showAddListForm)
+cancelBtn.addEventListener('click', hideAddListForm)
+addListBtn.addEventListener('click', addListOrHideListInput)
 
 
 // delete list
@@ -204,6 +260,5 @@ addListBlock.querySelector('.add-list-btn').addEventListener('click', showAddLis
 * add/remove check-list 
 * add/remove date 
 * add/remove comment
-
 * render lists and cards
 **/

@@ -42,6 +42,7 @@ textarea:focus {
   align-items: flex-start;
 }
 .list {
+  flex-shrink: 0;
   width: 272px;
   border-radius: 3px;
   margin: 0 8px 0 0;
@@ -147,7 +148,7 @@ textarea:focus {
   margin-bottom: 6px;
 }
 
-.add-list-btn { 
+.show-form-btn { 
   width: 272px;
   height: 40px;
   border: none;
@@ -160,10 +161,10 @@ textarea:focus {
   font-size: 14px;
   line-height: 28px;
 }
-.add-list-btn:hover {
+.show-form-btn:hover {
   background-color:hsla(0,0%,100%,.4);
 }
-.add-list-btn > svg {
+.show-form-btn > svg {
   color: #fff;
   position: relative;
   top: 3px;
@@ -171,6 +172,7 @@ textarea:focus {
 }
 
 .add-list-form {
+  display: none;
   width: 272px;
   padding: 4px;
   background-color: #ebecf0;
@@ -184,15 +186,15 @@ textarea:focus {
   line-height: 20px;
 }
 .add-list-form-controls {
-  width: 100%;
+  padding: 2px 0 0;
 }
-.add-list-form-btn {
+.add-list-btn {
   width: 50%;
   height: 32px;
   border: none;
   outline: none;
   font-size: 14px;
-  line-height: 30px;
+  line-height: 20px;
   color: #fff;
   background-color: #5aac44;
   border-radius: 3px;
@@ -202,8 +204,8 @@ textarea:focus {
   height: 32px;
   border: none;
   outline: none;
-  border-radius: 3px;
   font-size: 20px;
+  line-height: 20px;
   vertical-align: -2px;
   color: #6981ac;
   transition: color .3s;
