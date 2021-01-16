@@ -3,15 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    
     <title>Trello clone</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="script.js" defer></script>
+    
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/modal.css">
+
+    <script src="base.js" defer></script>
+    <script src="plugins/modal.js" defer></script>
+    <script src="app.js" defer></script>
+
 </head>
 <body>
 
     <div class="board">
     
-        <div class="list" draggable="true">
+        <div id="1" class="list" draggable="true">
             <div class="list__header">
                 <input type="text" class="list__title" value="List title">
                 <div class="list__options">
@@ -38,12 +45,11 @@
                         <rect x="9" y="1" width="2" height="17" rx="2"></rect>
                         <rect x="1" y="9" width="17" height="2" rx="2"></rect>
                     </svg>    
-                    Добавить еще одну карточку
                 </button>
             </div>
         </div>
     
-        <div class="list" draggable="true">
+        <div id="2" class="list" draggable="true">
             <div class="list__header">
                 <input type="text" class="list__title" value="List title">
                 <div class="list__options">
@@ -76,12 +82,11 @@
                         <rect x="9" y="1" width="2" height="17" rx="2"></rect>
                         <rect x="1" y="9" width="17" height="2" rx="2"></rect>
                     </svg>    
-                    Добавить еще одну карточку
                 </button>
             </div>
         </div>
 
-        <div class="list" draggable="true">
+        <div id="3" class="list" draggable="true">
             <div class="list__header">
                 <input type="text" class="list__title" value="List title">
                 <div class="list__options">
@@ -120,30 +125,24 @@
                         <rect x="9" y="1" width="2" height="17"></rect>
                         <rect x="1" y="9" width="17" height="2"></rect>
                     </svg>    
-                    Добавить еще одну карточку
                 </button>
             </div>
         </div>
 
+        <div class="add-list-block">
+            <button class="add-list-btn">
+                <svg width="16" height="16" fill="#fff" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" data-svg="plus">
+                    <rect x="9" y="1" width="2" height="17"></rect>
+                    <rect x="1" y="9" width="17" height="2"></rect>
+                </svg>
+                Добавить колонку
+            </button>
+        </div>
+
+
     </div>
 
 
-
-    <!-- <form>
-        <a class="open-add-list js-open-add-list" href="#" tabindex="-1">
-            <span class="placeholder">
-                <span class="icon-sm icon-add"></span>
-                Добавьте еще одну колонку
-            </span>
-        </a>
-        <input class="list-name-input" type="text" name="name" placeholder="Ввести заголовок списка" autocomplete="off" dir="auto" maxlength="512">
-        <div class="list-add-controls u-clearfix">
-            <input class="nch-button nch-button--primary mod-list-add-button js-save-edit" type="submit" value="Добавить список">
-            <a class="icon-lg icon-close dark-hover js-cancel-edit" href="#"></a>
-        </div>
-    </form> -->
-
     
-
 </body>
 </html>
