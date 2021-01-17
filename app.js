@@ -345,14 +345,21 @@ addListBtn.addEventListener('click', addListOrHideListInput)
 * drag&drop list +
 * create card +
 * create list +
-* render lists and cards + 
+* render lists and cards +
 * on click card show modal with card details +
+* render checklists +
+* modal with list settings
+* copy list
+* delete all list cards
+* delete list
 * delete card
-* update card title
 * mark card as done
-* add/remove description
-* add/remove date 
-* add/remove check-list 
-* delete list 
-* update list
+* description setter
+* marks modal
+* add/remove mark
+* checklist modal
+* add/remove checklist
+* expiration modal
+* add/remove expiration
+* update card title
 **/
