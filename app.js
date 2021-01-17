@@ -99,8 +99,6 @@ render()
 
 // optimized way to listen click on card instead of adding many eventListeners
 document.addEventListener('click', e => {
-    e.preventDefault()
-    
     if (e.target.classList.contains('card')) {
         const listID = e.target.parentNode.parentNode.id
         const list = data.lists.filter( list => list.id === +listID.slice(-1) )[0]
