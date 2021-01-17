@@ -103,9 +103,8 @@ document.addEventListener('click', e => {
         const listID = e.target.parentNode.parentNode.id
         const list = data.lists.filter( list => list.id === +listID.slice(-1) )[0]
         const card = list.cards.filter( card => card.title === e.target.innerText )[0]
-        const cardModal = $.modal(card)
-        cardModal.open()
-    }
+        const cardModal = $.modal(card) // DOM operations are async
+        setTimeout( () => cardModal.open(), 0)} // to see animation
 })
 
 
