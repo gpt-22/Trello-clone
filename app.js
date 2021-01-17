@@ -18,6 +18,18 @@ const data = {
                 {
                     title: 'Карточка 1',
                     description: 'Описание 1',
+                    marks: ['green'],
+                    checklists: [
+                        {
+                            title: 'Чек-лист 1',
+                            items: [
+                                { done: true,  text: 'todo 1' },
+                                { done: false, text: 'todo 2' },
+                                { done: false, text: 'todo 3' },
+                            ]
+                        }
+                    ],
+                    expiration: 'Sun Jan 17 2021 23:11:31',
                 },
                 {
                     title: 'Карточка 2',
@@ -104,7 +116,9 @@ document.addEventListener('click', e => {
         const list = data.lists.filter( list => list.id === +listID.slice(-1) )[0]
         const card = list.cards.filter( card => card.title === e.target.innerText )[0]
         const cardModal = $.modal(card) // DOM operations are async
-        setTimeout( () => cardModal.open(), 0)} // to see animation
+        setTimeout( () => cardModal.open(), 0) // to see animation
+        // cardModal.open()
+    }
 })
 
 

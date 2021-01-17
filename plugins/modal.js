@@ -1,7 +1,44 @@
+
+const checkListItemToHTML = item => `
+    <li class="checklist-item">
+        <div class="checklist-item-container">
+            <input type="checkbox" ${ item.done ? 'checked' : '' } />
+            <textarea class="checklist-item-title" rows="1">${ item.text }</textarea>
+        </div>
+    </li>
+`
+
+
+const checkListToHTML = checkList => `
+    <div class="checklist-block">
+        <div class="checklist-header">
+            <textarea class="checklist-title" rows="1"> ${ checkList.title } </textarea>
+            <button type="button" class="modal-btn default del-checklist-btn">Удалить</button>
+        </div>
+        <div class="checklist-body">
+            <div class="checklist-progress">
+            </div>
+            <div class="checklist-list-container">
+                <ul class="checklist-list">
+                    ${ checkList.items.map(checkListItemToHTML).join('') }
+                </ul>
+            </div>
+        </div>
+        <div class="checklist-footer">
+            <button type="button" class="modal-btn default checklist-add-item-btn">Добавить элемент</button>
+            <form class="checklist-add-form">
+                <textarea class="checklist-add-input" placeholder="Добавить элемент"></textarea>
+                <div class="checklist-add-form-btns">
+                    <button type="button" class="modal-btn primary">Сохранить</button>
+                    <button type="button" class="modal-btn default">&#10006;</button>
+                </div>                                    
+            </form>
+        </div>
+    </div>
+`
+
+
 function _createModal(options) {
-
-    options = typeof options === 'undefined' ? {} : options
-
     const modal = document.createElement('div')
     modal.classList.add('modal')
     modal.insertAdjacentHTML('afterbegin', `
@@ -16,59 +53,14 @@ function _createModal(options) {
                     <div class="modal-col modal-col-left">
                         <div class="modal-desc-block">
                             <h3 class="modal-desc-title">Описание</h3>
-                            <textarea class="modal-description" placeholder="Добавьте более подробное описание..." data-desc >
-${ options.description ? options.description : '' }</textarea>
+                            <textarea class="modal-description"placeholder="Добавьте более подробное описание..." data-desc >${ options.description ? options.description : '' }</textarea>
                             <div class="modal-desc-btns">
                                 <button type="button" class="modal-btn primary">Сохранить</button>
                                 <button type="button" class="modal-btn default">&#10006;</button>
                             </div>
                         </div>
 
-                        <div class="checklist-block">
-                            <div class="checklist-header">
-                                <textarea class="checklist-title" rows="1">Чек-лист</textarea>
-                                <button type="button" class="modal-btn default del-checklist-btn">Удалить</button>
-                            </div>
-                            <div class="checklist-body">
-                                <div class="checklist-progress">
-                                </div>
-                                <div class="checklist-list-container">
-                                    <ul class="checklist-list">
-                                      
-                                        <li class="checklist-item">
-                                            <div class="checklist-item-container">
-                                                <input type="checkbox" />
-                                                <textarea class="checklist-item-title" rows="1">
-1
-                                                </textarea>
-                                            </div>
-                                        </li>
-
-                                        <li class="checklist-item">
-                                            <div class="checklist-item-container">
-                                                <input type="checkbox" />
-                                                <textarea class="checklist-item-title" rows="1">
-2
-                                                </textarea>
-                                            </div>
-                                        </li>
-
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="checklist-footer">
-                                <button type="button" class="modal-btn default checklist-add-item-btn">Добавить элемент</button>
-                                <form class="checklist-add-form">
-                                    <textarea class="checklist-add-input" 
-                                              placeholder="Добавьте более подробное описание..."></textarea>
-                                    <div class="checklist-add-form-btns">
-                                        <button type="button" class="modal-btn primary">Сохранить</button>
-                                        <button type="button" class="modal-btn default">&#10006;</button>
-                                    </div>                                    
-                                </form>
-                            </div>
-                        </div>
-
+                        ${ options.hasOwnProperty('checklists') ? options.checklists.map(checkListToHTML).join('') : '' }
                     </div>
                     <div class="modal-col modal-col-right">
                         <div class="modal-add-block">
@@ -94,9 +86,60 @@ ${ options.description ? options.description : '' }</textarea>
 }
 
 
+function setModalEventListeners(modalNode) {
+    modalNode.addEventListener('click', e => (e.target.dataset.close === 'true') ? modal.close() : '')
+    const modalDesc = modalNode.querySelector('.modal-description')
+    const modalDescBtns = modalNode.querySelector('.modal-desc-btns')
+    modalDesc.addEventListener('focus', e => modalDescBtns.style.display = 'flex')
+    modalDesc.addEventListener('blur', e => {
+        modalDescBtns.style.display = 'none'
+        modalDesc.value === '' ? modalDesc.style.minHeight = '56px' : ''
+    })
+    modalDesc.addEventListener('input', e => {
+        modalDesc.style.height = 'auto'
+        modalDesc.style.height = modalDesc.scrollHeight + 'px'
+    })
+}
+
+
+function setCheckListsEventListeners(modalNode) {
+    modalNode.querySelectorAll('.checklist-item-title').forEach(item => {
+        item.addEventListener('focus', e => {
+            item.style.minHeight = '56px'
+            item.style.padding = '8px 12px'
+            item.parentNode.parentNode.insertAdjacentHTML('beforeend', `
+                <div class="checklist-item-btns">
+                    <button type="button" class="modal-btn primary">Сохранить</button>
+                    <button type="button" class="modal-btn default">&#10006;</button>
+                </div>
+            `)
+        })
+        item.addEventListener('blur', e => {
+            item.style.minHeight = '25.6px'
+            item.style.padding = '4px 8px'
+            itemNode = item.parentNode.parentNode
+            itemNode.removeChild(itemNode.children[itemNode.children.length - 1])
+        })
+    })
+    const addItemBtn = modalNode.querySelector('.checklist-add-item-btn')
+    addItemBtn.addEventListener('click', e => {
+        addForm = modalNode.querySelector('.checklist-add-form')
+        addForm.style.display = 'block'
+        addItemBtn.style.display = 'none'
+        input = addForm.querySelector('.checklist-add-input')
+        input.focus()
+        input.addEventListener('blur', e => {
+            addForm.style.display = 'none'
+            addItemBtn.style.display = 'block'
+        })
+    })
+}
+
+
 $.modal = function(options) {
     // closure -> access to private fields/methods
 
+    options = typeof options !== 'undefined' ? options : {}
     const $modalNode = _createModal(options)
     let isClosing = false
     let isDestroyed = false
@@ -127,48 +170,9 @@ $.modal = function(options) {
         }
     }
 
-    $modalNode.addEventListener('click', e => (e.target.dataset.close === 'true') ? modal.close() : '')
-    const modalDesc = $modalNode.querySelector('.modal-description')
-    const modalDescBtns = $modalNode.querySelector('.modal-desc-btns')
-    modalDesc.addEventListener('focus', e => modalDescBtns.style.display = 'flex')
-    modalDesc.addEventListener('blur', e => {
-        modalDescBtns.style.display = 'none'
-        modalDesc.value === '' ? modalDesc.style.minHeight = '56px' : ''
-    })
-    modalDesc.addEventListener('input', e => {
-        modalDesc.style.height = 'auto'
-        modalDesc.style.height = modalDesc.scrollHeight + 'px'
-    })
-    $modalNode.querySelectorAll('.checklist-item-title').forEach(item => {
-        item.addEventListener('focus', e => {
-            item.style.minHeight = '56px'
-            item.style.padding = '8px 12px'
-            item.parentNode.parentNode.insertAdjacentHTML('beforeend', `
-                <div class="checklist-item-btns">
-                    <button type="button" class="modal-btn primary">Сохранить</button>
-                    <button type="button" class="modal-btn default">&#10006;</button>
-                </div>
-            `)
-        })
-        item.addEventListener('blur', e => {
-            item.style.minHeight = '25.6px'
-            item.style.padding = '4px 8px'
-            itemNode = item.parentNode.parentNode
-            itemNode.removeChild(itemNode.children[itemNode.children.length - 1])
-        })
-    })
-    const addItemBtn = $modalNode.querySelector('.checklist-add-item-btn')
-    addItemBtn.addEventListener('click', e => {
-        addForm = $modalNode.querySelector('.checklist-add-form')
-        addForm.style.display = 'block'
-        addItemBtn.style.display = 'none'
-        input = addForm.querySelector('.checklist-add-input')
-        input.focus()
-        input.addEventListener('blur', e => {
-            addForm.style.display = 'none'
-            addItemBtn.style.display = 'block'
-        })
-    })
+    setModalEventListeners($modalNode)
+
+    if (options.hasOwnProperty('checklists')) setCheckListsEventListeners($modalNode)
 
     return modal
 }
