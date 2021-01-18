@@ -9,6 +9,9 @@ const addListBtn = addListBlock.querySelector('.add-list-btn')
 const cancelBtn = addListBlock.querySelector('.add-list-cancel-btn')
 
 
+const requestURL = ''
+
+
 const data = {
     lists: [
         {
@@ -116,8 +119,8 @@ document.addEventListener('click', e => {
         const list = data.lists.filter( list => list.id === +listID.slice(-1) )[0]
         const card = list.cards.filter( card => card.title === e.target.innerText )[0]
         const cardModal = $.modal(card) // DOM operations are async
+        // data = cardModal.getTitle()
         setTimeout( () => cardModal.open(), 0) // to see animation
-        // cardModal.open()
     }
 })
 
@@ -348,18 +351,25 @@ addListBtn.addEventListener('click', addListOrHideListInput)
 * render lists and cards +
 * on click card show modal with card details +
 * render checklists +
-* modal with list settings
+* update card title (18.01)
+* 1. AJAX GET request for data with JSONplacehoder (assign to 'data' obj)
+* 2. on blur title AJAX POST request to change title
+* description setter
+* mark card as done
+* list settings modal
 * copy list
 * delete all list cards
-* delete list
-* delete card
-* mark card as done
-* description setter
+* delete list (18.01)
+* delete card (18.01)
 * marks modal
 * add/remove mark
 * checklist modal
+* checklist progress bar
 * add/remove checklist
 * expiration modal
 * add/remove expiration
-* update card title
+* move card modal
+* move card
+* copy card modal
+* copy card
 **/

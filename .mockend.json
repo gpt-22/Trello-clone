@@ -1,0 +1,58 @@
+{
+  "lists": [
+    {
+      "id": 1,
+      "title": "Какой-то список 1",
+      "cards": [
+        {
+          "title": "Карточка 1",
+          "description": "Описание 1",
+          "marks": ["green"],
+          "checklists": [
+            {
+              "title": "Чек-лист 1",
+              "items": [
+                { "done": true,  "text": "todo 1" },
+                { "done": false, "text": "todo 2" },
+                { "done": false, "text": "todo 3" }
+              ]
+            }
+          ],
+          "expiration": "Sun Jan 17 2021 23:11:31"
+        },
+        {
+          "title": "Карточка 2",
+          "description": "Описание 2"
+        },
+        {
+          "title": "Карточка 3",
+          "description": "Описание 3"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Какой-то список 2",
+      "cards": [
+        {
+          "title": "Карточка 4",
+          "description": "Описание 4"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Какой-то список 3",
+      "cards": [
+        {
+          "title": "Карточка 5",
+          "description": "Описание 5"
+        },
+        {
+          "title": "Карточка 6",
+          "description": "Описание 6"
+        }
+      ]
+    }
+  ]
+}

@@ -38,7 +38,7 @@ const checkListToHTML = checkList => `
 `
 
 
-function _createModal(options) {
+function _createCardModal(options) {
     const modal = document.createElement('div')
     modal.classList.add('modal')
     modal.insertAdjacentHTML('afterbegin', `
@@ -46,14 +46,15 @@ function _createModal(options) {
             <div class="modal-container">
                 <div class="modal-header">
                     <input class="modal-title" type="text" placeholder="Название карточки" 
-                    value="${ options.hasOwnProperty('title') ? options.title : 'Название карточки' }">
+                    value="${ options.hasOwnProperty('title') ? options.title : 'Название карточки' }" data-title>
                     <span class="modal-close" data-close="true">&#10006;</span>
                 </div>
                 <div class="modal-body">
                     <div class="modal-col modal-col-left">
                         <div class="modal-desc-block">
                             <h3 class="modal-desc-title">Описание</h3>
-                            <textarea class="modal-description"placeholder="Добавьте более подробное описание..." data-desc >${ options.description ? options.description : '' }</textarea>
+                            <textarea class="modal-description" placeholder="Добавьте более подробное описание..." 
+                                      data-desc >${ options.description ? options.description : '' }</textarea>
                             <div class="modal-desc-btns">
                                 <button type="button" class="modal-btn primary">Сохранить</button>
                                 <button type="button" class="modal-btn default">&#10006;</button>
@@ -86,75 +87,167 @@ function _createModal(options) {
 }
 
 
-function setModalEventListeners(modalNode) {
-    modalNode.addEventListener('click', e => (e.target.dataset.close === 'true') ? modal.close() : '')
-    const modalDesc = modalNode.querySelector('.modal-description')
-    const modalDescBtns = modalNode.querySelector('.modal-desc-btns')
-    modalDesc.addEventListener('focus', e => modalDescBtns.style.display = 'flex')
-    modalDesc.addEventListener('blur', e => {
-        modalDescBtns.style.display = 'none'
-        modalDesc.value === '' ? modalDesc.style.minHeight = '56px' : ''
-    })
-    modalDesc.addEventListener('input', e => {
-        modalDesc.style.height = 'auto'
-        modalDesc.style.height = modalDesc.scrollHeight + 'px'
-    })
+const getCardModalMethods = $modalNode => {
+    return {
+        setDescription(text) {
+            $modalNode.querySelector('[data-desc]').innerText = text
+        },
+        setModalDescriptionEventListeners() {
+            const modalDesc = $modalNode.querySelector('.modal-description')
+            const modalDescBtns = $modalNode.querySelector('.modal-desc-btns')
+            modalDesc.addEventListener('focus', e => modalDescBtns.style.display = 'flex')
+            modalDesc.addEventListener('blur', e => {
+                modalDescBtns.style.display = 'none'
+                modalDesc.value === '' ? modalDesc.style.minHeight = '56px' : ''
+            })
+            modalDesc.addEventListener('input', e => {
+                modalDesc.style.height = 'auto'
+                modalDesc.style.height = modalDesc.scrollHeight + 'px'
+            })
+        },
+        setCheckListsEventListeners() {
+            const itemTitles = $modalNode.querySelectorAll('.checklist-item-title')
+            itemTitles.forEach(title => {
+                title.addEventListener('focus', e => {
+                    title.style.minHeight = '56px'
+                    title.style.padding = '8px 12px'
+                    const item = title.parentNode.parentNode
+                    item.insertAdjacentHTML('beforeend', `
+                        <div class="checklist-item-btns">
+                            <button type="button" class="modal-btn primary">Сохранить</button>
+                            <button type="button" class="modal-btn default">&#10006;</button>
+                        </div>
+                    `)
+                })
+                title.addEventListener('blur', e => {
+                    title.style.minHeight = '25.6px'
+                    title.style.padding = '4px 8px'
+                    const item = title.parentNode.parentNode
+                    item.removeChild(item.children[item.children.length - 1])
+                })
+            })
+            const addItemBtn = $modalNode.querySelector('.checklist-add-item-btn')
+            addItemBtn.addEventListener('click', e => {
+                addForm = $modalNode.querySelector('.checklist-add-form')
+                addForm.style.display = 'block'
+                addItemBtn.style.display = 'none'
+                input = addForm.querySelector('.checklist-add-input')
+                input.focus()
+                input.addEventListener('blur', e => {
+                    addForm.style.display = 'none'
+                    addItemBtn.style.display = 'block'
+                })
+            })
+        }
+    }
 }
 
 
-function setCheckListsEventListeners(modalNode) {
-    modalNode.querySelectorAll('.checklist-item-title').forEach(item => {
-        item.addEventListener('focus', e => {
-            item.style.minHeight = '56px'
-            item.style.padding = '8px 12px'
-            item.parentNode.parentNode.insertAdjacentHTML('beforeend', `
-                <div class="checklist-item-btns">
-                    <button type="button" class="modal-btn primary">Сохранить</button>
-                    <button type="button" class="modal-btn default">&#10006;</button>
-                </div>
-            `)
-        })
-        item.addEventListener('blur', e => {
-            item.style.minHeight = '25.6px'
-            item.style.padding = '4px 8px'
-            itemNode = item.parentNode.parentNode
-            itemNode.removeChild(itemNode.children[itemNode.children.length - 1])
-        })
-    })
-    const addItemBtn = modalNode.querySelector('.checklist-add-item-btn')
-    addItemBtn.addEventListener('click', e => {
-        addForm = modalNode.querySelector('.checklist-add-form')
-        addForm.style.display = 'block'
-        addItemBtn.style.display = 'none'
-        input = addForm.querySelector('.checklist-add-input')
-        input.focus()
-        input.addEventListener('blur', e => {
-            addForm.style.display = 'none'
-            addItemBtn.style.display = 'block'
-        })
-    })
+function _createOptionModal(options) {
+    const modal = document.createElement('div')
+    modal.classList.add('modal')
+    modal.insertAdjacentHTML('afterbegin', `
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 class="modal-title" style="text-align: center;" data-title>
+                    ${ options.hasOwnProperty('title') ? options.title : 'Название карточки' }
+                </h3>
+                <span class="modal-close" data-close="true">&#10006;</span>
+            </div>
+            <div class="modal-body">
+                ${ getOptionBody(options) }
+            </div>
+        </div>
+    `)
+    document.body.appendChild(modal)
+
+    return modal
+}
+
+
+function getOptionBody(options) {
+    const type = options.type
+    body = ''
+    switch (type) {
+        case 'listSettings':
+            body = getListSettingsModalBody(options)
+            break;
+        case 'marks':
+            body = getMarksModalBody(options)
+            break;
+        case 'checklist':
+            body = getChecklistModalBody(options)
+            break;
+        case 'expiration':
+            body = getExpirationModalBody(options)
+            break;
+        case 'moveCard':
+            body = getMoveCardModalBody(options)
+            break;
+        case 'copyCard':
+            body = getCopyCardModalBody(options)
+            break;
+    }
+    return body
+}
+
+
+function getListSettingsModalBody(options) {
+
+}
+
+
+function getMarksModalBody(options) {
+
+}
+
+
+function getChecklistModalBody(options) {
+
+}
+
+
+function getExpirationModalBody(options) {
+
+}
+
+
+function getMoveCardModalBody(options) {
+
+}
+
+
+function getCopyCardModalBody(options) {
+
 }
 
 
 $.modal = function(options) {
     // closure -> access to private fields/methods
 
+    // modal types:
+    // 'card'
+    // 'listSettings'
+    // 'marks'
+    // 'checklist'
+    // 'expiration'
+    // 'moveCard'
+    // 'copyCard'
+
     options = typeof options !== 'undefined' ? options : {}
-    const $modalNode = _createModal(options)
-    let isClosing = false
+    const type = options.type ? options.type : 'card'
     let isDestroyed = false
+    let $modalNode
 
     const modal = {
         open() {
             if (isDestroyed) return
-            !isClosing && $modalNode.classList.add('open')
+            $modalNode.classList.add('open')
         },
         close() {
-            isClosing = true
             $modalNode.classList.remove('open')
-            $modalNode.classList.add('hiding')     
+            $modalNode.classList.add('hiding')
             setTimeout( () => {
-                isClosing = false
                 $modalNode.classList.remove('hiding')
                 this.destroy()
             }, 500)
@@ -165,14 +258,19 @@ $.modal = function(options) {
             $modalClone.parentNode.removeChild($modalClone)
             isDestroyed = true
         },
-        setHTML(html){
-            $modalNode.querySelector('[data-desc]').innerHTML = html
-        }
+        setTitle(text) {
+            $modalNode.querySelector('[data-title]').innerText = text
+        },
     }
 
-    setModalEventListeners($modalNode)
+    if (type === 'card') {
+        $modalNode = _createCardModal(options)
+        Object.assign(modal, getCardModalMethods($modalNode))
+        if (options.hasOwnProperty('checklists'))
+            modal.setCheckListsEventListeners()
+    } else $modalNode = _createOptionModal(options)
 
-    if (options.hasOwnProperty('checklists')) setCheckListsEventListeners($modalNode)
+    $modalNode.addEventListener('click', e => (e.target.dataset.close === 'true') ? modal.close() : '')
 
     return modal
 }
