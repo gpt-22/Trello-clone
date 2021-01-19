@@ -1,5 +1,5 @@
 // Vars
-const requestURL = 'http://127.0.0.1:8000/api/board/'
+const requestURL = 'http://127.0.0.1:8000/api/board/' // custom api form django
 
 let data
 

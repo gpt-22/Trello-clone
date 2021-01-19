@@ -1,23 +1,25 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    
-    <title>Trello clone</title>
-    
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/modal.css">
 
-    <script src="base.js"></script>
-    <script src="plugins/modal.js" defer></script>
-    <script src="app.js" defer></script>
-    
+    <title>Trello clone</title>
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/modal.css' %}">
+
+    <script src="{% static 'js/base.js' %}"></script>
+    <script src="{% static 'js/plugins/modal.js' %}" defer></script>
+    <script src="{% static 'js/app.js' %}" defer></script>
+
 </head>
 <body>
 
     <div id="app" class="board">
-   
+
         <div class="add-list-block">
             <button class="show-form-btn">
                 <svg width="16" height="16" fill="#fff" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" data-svg="plus">
@@ -35,6 +37,6 @@
         </div>
 
     </div>
-    
+
 </body>
 </html>
