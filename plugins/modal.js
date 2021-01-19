@@ -272,5 +272,37 @@ $.modal = function(options) {
 
     $modalNode.addEventListener('click', e => (e.target.dataset.close === 'true') ? modal.close() : '')
 
+    const modalTitle = $modalNode.querySelector('.modal-title')
+    modalTitle.addEventListener('blur', e => {
+        console.log('blur', modalTitle.value)
+
+        function sendRequest(method, url, body = null) {
+            return fetch(url, {
+                method: method,
+                body: JSON.stringify(body),
+                headers: {
+                    'Content-type': 'application/json; charset=UTF-8',
+                },
+            }).then(response => {
+                return response.json()
+            })
+        }
+
+        const body = {
+            title: modalTitle.value
+        }
+
+        console.log(options)
+
+        const listId = 1
+        const requestURL = `http://localhost:3000/cards?listId=${ listId }`
+
+
+        // sendRequest('PUT', requestURL, body)
+        //     .then(data => console.log(data))
+        //     .catch(err => console.log(err))
+
+    })
+
     return modal
 }

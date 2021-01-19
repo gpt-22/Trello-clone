@@ -1,4 +1,7 @@
 // Vars
+const requestURL = 'http://127.0.0.1:8000/api/board/'
+
+let data
 
 const board = document.querySelector('.board')
 const addListBlock = board.querySelector('.add-list-block')
@@ -14,43 +17,36 @@ let lists,
 
 
 function sendRequest(method, url, body = null) {
-    return fetch(url).then(response => {
-        return response.json()
-    })
+    return fetch(url).then(response => response.json())
 }
-
-const requestURL = 'http://localhost:3000/db'
-
-let data
 
 
 sendRequest('GET', requestURL)
-    .then(d => {
-        data = d
-
-        render()
-
-        lists = board.querySelectorAll('.list')
-        cards = board.querySelectorAll('.card')
-        addCardBtns = document.querySelectorAll('.add-card-btn')
-
-        board.addEventListener('dragover', onOverBoard)
-        lists.forEach(list => addListEvents(list))
-        cards.forEach(card => addCardEvents(card))
-        addCardBtns.forEach(btn => btn.addEventListener('click', addTextArea))
-        addListBlock.addEventListener('click', () => formInput.focus())
-        showFormBtn.addEventListener('click', showAddListForm)
-        cancelBtn.addEventListener('click', hideAddListForm)
-        addListBtn.addEventListener('click', addListOrHideListInput)
-    })
+    .then(response => main(response[0]))
     .catch(err => console.log(err))
 
-// const body = {}
-// sendRequest('POST', requestURL, body)
-//     .then(data => console.log(data))
-//     .catch(err => console.log(err))
-//
 
+const main = (response) => {
+    data = response
+
+    render()
+
+    lists = board.querySelectorAll('.list')
+    cards = board.querySelectorAll('.card')
+    addCardBtns = document.querySelectorAll('.add-card-btn')
+
+    board.addEventListener('dragover', onOverBoard)
+    lists.forEach(list => addListEvents(list))
+    cards.forEach(card => addCardEvents(card))
+    addCardBtns.forEach(btn => btn.addEventListener('click', addTextArea))
+    addListBlock.addEventListener('click', () => formInput.focus())
+    showFormBtn.addEventListener('click', showAddListForm)
+    cancelBtn.addEventListener('click', hideAddListForm)
+    addListBtn.addEventListener('click', addListOrHideListInput)
+}
+
+
+//
 
 const cardToHTML = card => `<div class="list__item card" draggable="true">${ card.title }</div>`
 
@@ -312,6 +308,12 @@ function addListOrHideListInput() {
 * update card title (18.01)
 * 1. AJAX GET request for data and it assign to 'data' obj (json-server) +
 * 2. on blur title AJAX POST request to change title
+* API:
+* lists/
+* lists/id/
+* lists/id/cards/
+* lists/id/cards/id/
+*
 * description setter
 * mark card as done
 * list settings modal
