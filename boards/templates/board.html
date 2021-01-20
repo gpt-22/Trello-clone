@@ -1,22 +1,6 @@
-{% load static %}
+{% extends 'base.html' %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-
-    <title>Trello clone</title>
-
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="stylesheet" href="{% static 'css/modal.css' %}">
-
-    <script src="{% static 'js/base.js' %}"></script>
-    <script src="{% static 'js/plugins/modal.js' %}" defer></script>
-    <script src="{% static 'js/app.js' %}" defer></script>
-
-</head>
-<body>
+{% block content %}
 
     <div id="app" class="board">
 
@@ -38,5 +22,4 @@
 
     </div>
 
-</body>
-</html>
+{% endblock %}

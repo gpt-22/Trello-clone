@@ -105,39 +105,42 @@ const getCardModalMethods = $modalNode => {
                 modalDesc.style.height = modalDesc.scrollHeight + 'px'
             })
         },
-        setCheckListsEventListeners() {
-            const itemTitles = $modalNode.querySelectorAll('.checklist-item-title')
-            itemTitles.forEach(title => {
-                title.addEventListener('focus', e => {
-                    title.style.minHeight = '56px'
-                    title.style.padding = '8px 12px'
-                    const item = title.parentNode.parentNode
-                    item.insertAdjacentHTML('beforeend', `
-                        <div class="checklist-item-btns">
-                            <button type="button" class="modal-btn primary">Сохранить</button>
-                            <button type="button" class="modal-btn default">&#10006;</button>
-                        </div>
-                    `)
-                })
-                title.addEventListener('blur', e => {
-                    title.style.minHeight = '25.6px'
-                    title.style.padding = '4px 8px'
-                    const item = title.parentNode.parentNode
-                    item.removeChild(item.children[item.children.length - 1])
-                })
-            })
-            const addItemBtn = $modalNode.querySelector('.checklist-add-item-btn')
-            addItemBtn.addEventListener('click', e => {
-                addForm = $modalNode.querySelector('.checklist-add-form')
-                addForm.style.display = 'block'
-                addItemBtn.style.display = 'none'
-                input = addForm.querySelector('.checklist-add-input')
-                input.focus()
-                input.addEventListener('blur', e => {
-                    addForm.style.display = 'none'
-                    addItemBtn.style.display = 'block'
-                })
-            })
+        setChecklistsEventListeners() {
+            // const itemTitles = $modalNode.querySelectorAll('.checklist-item-title')
+            // itemTitles.forEach(title => {
+            //     title.addEventListener('focus', e => {
+            //         title.style.minHeight = '56px'
+            //         title.style.padding = '8px 12px'
+            //         const item = title.parentNode.parentNode
+            //         item.insertAdjacentHTML('beforeend', `
+            //             <div class="checklist-item-btns">
+            //                 <button type="button" class="modal-btn primary">Сохранить</button>
+            //                 <button type="button" class="modal-btn default">&#10006;</button>
+            //             </div>
+            //         `)
+            //     })
+            //     title.addEventListener('blur', e => {
+            //         title.style.minHeight = '25.6px'
+            //         title.style.padding = '4px 8px'
+            //         const item = title.parentNode.parentNode
+            //         item.removeChild(item.children[item.children.length - 1])
+            //     })
+            // })
+            // const addItemBtn = $modalNode.querySelector('.checklist-add-item-btn')
+            // addItemBtn.addEventListener('click', e => {
+            //     addForm = $modalNode.querySelector('.checklist-add-form')
+            //     addForm.style.display = 'block'
+            //     addItemBtn.style.display = 'none'
+            //     input = addForm.querySelector('.checklist-add-input')
+            //     input.focus()
+            //     input.addEventListener('blur', e => {
+            //         addForm.style.display = 'none'
+            //         addItemBtn.style.display = 'block'
+            //     })
+            // })
+        },
+        setChecklistItemsEventListeners() {
+
         }
     }
 }
@@ -222,7 +225,7 @@ function getCopyCardModalBody(options) {
 }
 
 
-$.modal = function(options) {
+const modal = function(options) {
     // closure -> access to private fields/methods
 
     // modal types:
@@ -267,7 +270,7 @@ $.modal = function(options) {
         $modalNode = _createCardModal(options)
         Object.assign(modal, getCardModalMethods($modalNode))
         if (options.hasOwnProperty('checklists'))
-            modal.setCheckListsEventListeners()
+            modal.setChecklistsEventListeners()
     } else $modalNode = _createOptionModal(options)
 
     $modalNode.addEventListener('click', e => (e.target.dataset.close === 'true') ? modal.close() : '')
@@ -306,3 +309,5 @@ $.modal = function(options) {
 
     return modal
 }
+
+module.exports = modal

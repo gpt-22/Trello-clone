@@ -1,19 +1,20 @@
+const modal = require('./plugins/modal')
+
 // Vars
 const requestURL = 'http://127.0.0.1:8000/api/board/' // custom api form django
 
 let data
 
-const board = document.querySelector('.board')
-const addListBlock = board.querySelector('.add-list-block')
-const showFormBtn = addListBlock.querySelector('.show-form-btn')
-const addListForm = addListBlock.querySelector('.add-list-form')
-const formInput = addListBlock.querySelector('.add-list-input')
-const addListBtn = addListBlock.querySelector('.add-list-btn')
-const cancelBtn = addListBlock.querySelector('.add-list-cancel-btn')
-
 let lists,
     cards,
-    addCardBtns
+    addCardBtns,
+    board,
+    addListBlock,
+    showFormBtn,
+    addListForm,
+    formInput,
+    addListBtn,
+    cancelBtn
 
 
 function sendRequest(method, url, body = null) {
@@ -30,6 +31,14 @@ const main = (response) => {
     data = response
 
     render()
+
+    board = document.querySelector('.board')
+    addListBlock = board.querySelector('.add-list-block')
+    showFormBtn = addListBlock.querySelector('.show-form-btn')
+    addListForm = addListBlock.querySelector('.add-list-form')
+    formInput = addListBlock.querySelector('.add-list-input')
+    addListBtn = addListBlock.querySelector('.add-list-btn')
+    cancelBtn = addListBlock.querySelector('.add-list-cancel-btn')
 
     lists = board.querySelectorAll('.list')
     cards = board.querySelectorAll('.card')
@@ -92,7 +101,8 @@ document.addEventListener('click', e => {
         const listID = e.target.parentNode.parentNode.id
         const list = data.lists.filter( list => list.id === +listID.slice(-1) )[0]
         const card = list.cards.filter( card => card.title === e.target.innerText )[0]
-        const cardModal = $.modal(card) // DOM operations are async
+        const cardModal = modal(card) // DOM operations are async
+        console.log(cardModal)
         // data = cardModal.getTitle()
         setTimeout( () => cardModal.open(), 0) // to see animation
     }
@@ -306,7 +316,7 @@ function addListOrHideListInput() {
 * on click card show modal with card details +
 * render checklists +
 * update card title (18.01)
-* 1. AJAX GET request for data and it assign to 'data' obj (json-server) +
+* 1. AJAX GET request for data and it assign to 'data' obj (django api) +
 * 2. on blur title AJAX POST request to change title
 * API:
 * lists/
