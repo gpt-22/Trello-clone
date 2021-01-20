@@ -3,6 +3,8 @@ const modal = require('./plugins/modal')
 // Vars
 const requestURL = 'http://127.0.0.1:8000/api/board/' // custom api form django
 
+// const UNUSEDVAR = 42
+
 let data
 
 let lists,
