@@ -1,3 +1,5 @@
+import {sendRequest, hasProperty} from './../helpers'
+
 
 const checkListItemToHTML = item => `
     <li class="checklist-item">
@@ -46,7 +48,7 @@ function _createCardModal(options) {
             <div class="modal-container">
                 <div class="modal-header">
                     <input class="modal-title" type="text" placeholder="Название карточки" 
-                    value="${ options.hasOwnProperty('title') ? options.title : 'Название карточки' }" data-title>
+                    value="${ hasProperty(options, 'title') ? options.title : 'Название карточки' }" data-title>
                     <span class="modal-close" data-close="true">&#10006;</span>
                 </div>
                 <div class="modal-body">
@@ -61,7 +63,7 @@ function _createCardModal(options) {
                             </div>
                         </div>
 
-                        ${ options.hasOwnProperty('checklists') ? options.checklists.map(checkListToHTML).join('') : '' }
+                        ${ hasProperty(options, 'checklists') ? options.checklists.map(checkListToHTML).join('') : '' }
                     </div>
                     <div class="modal-col modal-col-right">
                         <div class="modal-add-block">
@@ -153,7 +155,7 @@ function _createOptionModal(options) {
         <div class="modal-container">
             <div class="modal-header">
                 <h3 class="modal-title" style="text-align: center;" data-title>
-                    ${ options.hasOwnProperty('title') ? options.title : 'Название карточки' }
+                    ${ hasProperty(options, 'title') ? options.title : 'Название карточки' }
                 </h3>
                 <span class="modal-close" data-close="true">&#10006;</span>
             </div>
@@ -170,28 +172,20 @@ function _createOptionModal(options) {
 
 function getOptionBody(options) {
     const type = options.type
-    body = ''
     switch (type) {
         case 'listSettings':
-            body = getListSettingsModalBody(options)
-            break;
+            return  getListSettingsModalBody(options)
         case 'marks':
-            body = getMarksModalBody(options)
-            break;
+            return getMarksModalBody(options)
         case 'checklist':
-            body = getChecklistModalBody(options)
-            break;
+            return getChecklistModalBody(options)
         case 'expiration':
-            body = getExpirationModalBody(options)
-            break;
+            return getExpirationModalBody(options)
         case 'moveCard':
-            body = getMoveCardModalBody(options)
-            break;
+            return getMoveCardModalBody(options)
         case 'copyCard':
-            body = getCopyCardModalBody(options)
-            break;
+            return getCopyCardModalBody(options)
     }
-    return body
 }
 
 
@@ -225,7 +219,7 @@ function getCopyCardModalBody(options) {
 }
 
 
-const modal = function(options) {
+export const modal = function(options) {
     // closure -> access to private fields/methods
 
     // modal types:
@@ -269,7 +263,7 @@ const modal = function(options) {
     if (type === 'card') {
         $modalNode = _createCardModal(options)
         Object.assign(modal, getCardModalMethods($modalNode))
-        if (options.hasOwnProperty('checklists'))
+        if (hasProperty(options, 'checklists'))
             modal.setChecklistsEventListeners()
     } else $modalNode = _createOptionModal(options)
 
@@ -279,35 +273,16 @@ const modal = function(options) {
     modalTitle.addEventListener('blur', e => {
         console.log('blur', modalTitle.value)
 
-        function sendRequest(method, url, body = null) {
-            return fetch(url, {
-                method: method,
-                body: JSON.stringify(body),
-                headers: {
-                    'Content-type': 'application/json; charset=UTF-8',
-                },
-            }).then(response => {
-                return response.json()
-            })
-        }
-
         const body = {
             title: modalTitle.value
         }
-
-        console.log(options)
-
+        // console.log(options)
         const listId = 1
         const requestURL = `http://localhost:3000/cards?listId=${ listId }`
-
-
-        // sendRequest('PUT', requestURL, body)
-        //     .then(data => console.log(data))
-        //     .catch(err => console.log(err))
-
+        sendRequest('GET', requestURL, body)
+            .then(data => console.log(data))
+            .catch(err => console.log(err))
     })
 
     return modal
 }
-
-module.exports = modal

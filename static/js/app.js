@@ -1,9 +1,9 @@
-const modal = require('./plugins/modal')
+import {sendRequest} from './helpers'
+import {modal} from './plugins/modal'
+
 
 // Vars
-const requestURL = 'http://127.0.0.1:8000/api/board/' // custom api form django
-
-// const UNUSEDVAR = 42
+const requestURL = 'http://127.0.0.1:8000/api/board/' // custom api from django
 
 let data
 
@@ -17,16 +17,6 @@ let lists,
     formInput,
     addListBtn,
     cancelBtn
-
-
-function sendRequest(method, url, body = null) {
-    return fetch(url).then(response => response.json())
-}
-
-
-sendRequest('GET', requestURL)
-    .then(response => main(response[0]))
-    .catch(err => console.log(err))
 
 
 const main = (response) => {
@@ -56,6 +46,10 @@ const main = (response) => {
     addListBtn.addEventListener('click', addListOrHideListInput)
 }
 
+
+sendRequest('GET', requestURL)
+    .then(response => main(response[0]))
+    .catch(err => console.log(err))
 
 //
 
