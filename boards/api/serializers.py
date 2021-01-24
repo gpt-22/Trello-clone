@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from .models import Board, List, Card, Mark, Checklist, ChecklistItem
+from boards.models import Board, List, Card, Mark, Checklist, ChecklistItem
 
 
 class ChecklistItemSerializer(ModelSerializer):

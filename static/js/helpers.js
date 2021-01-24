@@ -1,14 +1,15 @@
 
 export function sendRequest(method, url, body = null) {
-    const headers = {
-        'Content-Type': 'application/json; charset=UTF-8'
+    const fetchInit = {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json; charset=UTF-8'
+        }
     }
 
-    return fetch(url, {
-        method: method,
-        body: JSON.stringify(body),
-        headers: headers
-    }).then(response => response.json())
+    if (body !== null) fetchInit.body = JSON.stringify(body)
+
+    return fetch(url, fetchInit).then(response => response.json())
 }
 
 export const hasProperty = (object, property) => {

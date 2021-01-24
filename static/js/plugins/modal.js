@@ -277,11 +277,11 @@ export const modal = function(options) {
             title: modalTitle.value
         }
         // console.log(options)
-        const listId = 1
-        const requestURL = `http://localhost:3000/cards?listId=${ listId }`
-        sendRequest('GET', requestURL, body)
-            .then(data => console.log(data))
-            .catch(err => console.log(err))
+        // const listId = 1
+        // const requestURL = `http://localhost:3000/cards?listId=${ listId }`
+        // sendRequest('GET', requestURL, body)
+        //     .then(data => console.log(data))
+        //     .catch(err => console.log(err))
     })
 
     return modal

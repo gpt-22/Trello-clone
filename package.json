@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": "webpack --watch"
+    "server": "cd venv/Scripts && activate && cd ../.. && manage.py runserver"
   },
   "browserslist": "> 0.25%, not dead",
   "repository": {

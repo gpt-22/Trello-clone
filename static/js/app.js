@@ -98,7 +98,6 @@ document.addEventListener('click', e => {
         const list = data.lists.filter( list => list.id === +listID.slice(-1) )[0]
         const card = list.cards.filter( card => card.title === e.target.innerText )[0]
         const cardModal = modal(card) // DOM operations are async
-        console.log(cardModal)
         // data = cardModal.getTitle()
         setTimeout( () => cardModal.open(), 0) // to see animation
     }
@@ -261,7 +260,7 @@ function hideAddListForm() {
 }
 
 
-const closeAddListForm = e => document.activeElement !== formInput ? hideAddListForm() : ''
+const closeAddListForm = () => document.activeElement !== formInput ? hideAddListForm() : ''
 
 
 function listHTMLToNode(listHTML) {
@@ -278,7 +277,7 @@ function createList(title) {
         cards: [],
     }
     data.lists.push(newList)
-    newListNode = listHTMLToNode(listToHTML(newList))
+    const newListNode = listHTMLToNode(listToHTML(newList))
     addListEvents(newListNode)
     newListNode.querySelector('.add-card-btn').addEventListener('click', addTextArea)
     return newListNode
@@ -311,22 +310,16 @@ function addListOrHideListInput() {
 * render lists and cards +
 * on click card show modal with card details +
 * render checklists +
-* update card title (18.01)
-* 1. AJAX GET request for data and it assign to 'data' obj (django api) +
-* 2. on blur title AJAX POST request to change title
-* API:
-* lists/
-* lists/id/
-* lists/id/cards/
-* lists/id/cards/id/
-*
+* update card title
+*     1. AJAX GET data request and assign it to 'data' obj +
+*     2. on blur title AJAX POST request to change title
 * description setter
 * mark card as done
 * list settings modal
 * copy list
 * delete all list cards
-* delete list (18.01)
-* delete card (18.01)
+* delete list
+* delete card
 * marks modal
 * add/remove mark
 * checklist modal

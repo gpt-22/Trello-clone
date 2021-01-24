@@ -18,7 +18,7 @@ from django.urls import path, include
 
 from rest_framework.routers import DefaultRouter
 
-from boards.views import BoardViewSet, ListViewSet, CardViewSet
+from boards.api.views import BoardViewSet, ListViewSet, CardViewSet
 
 
 router = DefaultRouter()
