@@ -207,6 +207,7 @@ function createCardInDOM(title) {
     return newCard
 }
 
+
 function createCardInDB(listID, title) {
     const body = {
         list: listID,
@@ -222,6 +223,7 @@ function createCardInDB(listID, title) {
         .then(data => console.log(data))
         .catch(err => console.log(err))
 }
+
 
 function addCardOrHideTextArea(e) {
     const listBody = this.parentNode

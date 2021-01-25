@@ -219,6 +219,15 @@ function getCopyCardModalBody(options) {
 }
 
 
+function changeCardTitleInList(listId, oldTitle, newTitle) {
+    const list = document.getElementById('list' + listId)
+    const cards = list.querySelectorAll('.card')
+    cards.forEach(card => {
+        if (card.innerText === oldTitle) card.innerText = newTitle
+    })
+}
+
+
 export const modal = function(options) {
     // closure -> access to private fields/methods
 
@@ -288,6 +297,8 @@ export const modal = function(options) {
         sendRequest('PATCH', URL, body, headers)
             .then(data => console.log(data))
             .catch(err => console.log(err))
+
+        changeCardTitleInList(listId, options.title, modalTitle.value)
     })
 
     return modal
