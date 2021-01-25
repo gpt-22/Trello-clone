@@ -16,21 +16,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
-from rest_framework.routers import DefaultRouter
-
-from boards.api.views import BoardViewSet, ListViewSet, CardViewSet
-
-
-router = DefaultRouter()
-
-router.register('api/board', BoardViewSet, basename='board')
-router.register('api/lists', ListViewSet, basename='list')
-router.register('api/cards', CardViewSet, basename='card')
-
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('boards.urls')),
 ]
-
-urlpatterns += router.urls

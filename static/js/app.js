@@ -3,7 +3,7 @@ import {modal} from './plugins/modal'
 
 
 // Vars
-const requestURL = 'http://127.0.0.1:8000/api/board/' // custom api from django
+const getBoardURL = 'http://127.0.0.1:8000/api/board/1/' // custom api from django
 
 let data
 
@@ -47,7 +47,7 @@ const main = (response) => {
 }
 
 
-sendRequest('GET', requestURL)
+sendRequest('GET', getBoardURL)
     .then(response => main(response[0]))
     .catch(err => console.log(err))
 
@@ -277,6 +277,8 @@ function createList(title) {
         cards: [],
     }
     data.lists.push(newList)
+    const URL = `http://127.0.0.1:8000/api/board//${ listId }`
+    sendRequest('POST', URL)
     const newListNode = listHTMLToNode(listToHTML(newList))
     addListEvents(newListNode)
     newListNode.querySelector('.add-card-btn').addEventListener('click', addTextArea)
@@ -305,8 +307,8 @@ function addListOrHideListInput() {
 /* TODO:
 * drag&drop card +
 * drag&drop list +
-* create card +
-* create list +
+* create card
+* create list
 * render lists and cards +
 * on click card show modal with card details +
 * render checklists +
