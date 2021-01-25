@@ -271,8 +271,6 @@ export const modal = function(options) {
 
     const modalTitle = $modalNode.querySelector('.modal-title')
     modalTitle.addEventListener('blur', e => {
-        console.log('blur', modalTitle.value)
-
         const body = {
             title: modalTitle.value
         }

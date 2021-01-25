@@ -96,7 +96,7 @@ document.addEventListener('click', e => {
     if (e.target.classList.contains('card')) {
         const listID = e.target.parentNode.parentNode.id
         const list = data.lists.filter( list => list.id === +listID.slice(-1) )[0]
-        const card = list.cards.filter( card => card.title === e.target.innerText )[0]
+        const card = list.cards.filter( card => card.title === e.target.innerText.trim())[0]
         const cardModal = modal(card) // DOM operations are async
         setTimeout( () => cardModal.open(), 0) // to see animation
     }
@@ -196,7 +196,7 @@ function isValidTitle(titleText) {
 }
 
 
-function createCard(title) {
+function createCardInDOM(title) {
     const newCard = document.createElement('div')
     newCard.className += 'list__item card'
     newCard.setAttribute('draggable', 'true')
@@ -207,12 +207,31 @@ function createCard(title) {
     return newCard
 }
 
+function createCardInDB(listID, title) {
+    const body = {
+        list: listID,
+        title: title
+    }
+    const csrfToken = document.cookie.match(/csrftoken=([\w-]+)/)[1]
+    const headers = {
+        'X-CSRFToken':  csrfToken,
+        'Content-Type': 'application/json; charset=UTF-8'
+    }
+    const URL = `http://127.0.0.1:8000/api/boards/1/lists/${ listID }/cards/`
+    sendRequest('POST', URL, body, headers)
+        .then(data => console.log(data))
+        .catch(err => console.log(err))
+}
 
-function addCardOrHideTextArea() {
+function addCardOrHideTextArea(e) {
     const listBody = this.parentNode
-
-    if (isValidTitle(this.value)) {
-        const newCard = createCard(this.value)
+    const title = this.value
+    if (isValidTitle(title)) {
+        const listID = +(e.target.parentNode.parentNode.id.slice(-1))
+        createCardInDB(listID, title)
+        sendRequest('GET', getBoardURL)
+            .then(response => data = response)
+        const newCard = createCardInDOM(title)
         listBody.insertBefore(newCard, this)
         this.value = ''
         this.focus()
@@ -306,7 +325,7 @@ function addListOrHideListInput() {
 /* TODO:
 * drag&drop card +
 * drag&drop list +
-* create card
+* create card +
 * create list
 * render lists and cards +
 * on click card show modal with card details +
