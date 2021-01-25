@@ -11,7 +11,7 @@ class ChecklistItemSerializer(ModelSerializer):
 
 
 class ChecklistSerializer(ModelSerializer):
-    items = ChecklistItemSerializer(many=True)
+    items = ChecklistItemSerializer(many=True, required=False)
 
     class Meta:
         model = Checklist
@@ -26,16 +26,16 @@ class MarkSerializer(ModelSerializer):
 
 
 class CardSerializer(ModelSerializer):
-    marks = MarkSerializer(many=True)
-    checklists = ChecklistSerializer(many=True)
+    marks = MarkSerializer(many=True, required=False)
+    checklists = ChecklistSerializer(many=True, required=False)
 
     class Meta:
         model = Card
-        fields = ['id', 'title', 'description', 'marks', 'checklists', 'expiration', 'created_at']
+        fields = ['id', 'list', 'title', 'description', 'marks', 'checklists', 'expiration', 'created_at']
 
 
 class ListSerializer(ModelSerializer):
-    cards = CardSerializer(many=True)
+    cards = CardSerializer(many=True, required=False)
 
     class Meta:
         model = List
@@ -43,7 +43,10 @@ class ListSerializer(ModelSerializer):
 
 
 class BoardSerializer(ModelSerializer):
-    lists = ListSerializer(many=True)
+    lists = ListSerializer(many=True, required=False)
+
+    def create(self, validated_data):
+        return Board.objects.create(**validated_data)
 
     class Meta:
         model = Board

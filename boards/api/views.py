@@ -12,15 +12,13 @@ from boards.models import Board, List, Card, Mark, Checklist
 
 
 class BoardViewSet(ModelViewSet):
-
-    queryset = Board.objects.all()
     serializer_class = BoardSerializer
+    queryset = Board.objects.all()
     # permission_classes = [IsAuthenticated]
 
 
 class ListViewSet(ModelViewSet):
 
-    queryset = List.objects.all()
     serializer_class = ListSerializer
 
     def get_queryset(self):
