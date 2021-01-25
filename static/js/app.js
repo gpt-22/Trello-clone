@@ -3,7 +3,7 @@ import {modal} from './plugins/modal'
 
 
 // Vars
-const getBoardURL = 'http://127.0.0.1:8000/api/board/1/' // custom api from django
+const getBoardURL = 'http://127.0.0.1:8000/api/boards/1'  // just takes the first board
 
 let data
 
@@ -48,7 +48,7 @@ const main = (response) => {
 
 
 sendRequest('GET', getBoardURL)
-    .then(response => main(response[0]))
+    .then(response => main(response))
     .catch(err => console.log(err))
 
 //
@@ -98,7 +98,6 @@ document.addEventListener('click', e => {
         const list = data.lists.filter( list => list.id === +listID.slice(-1) )[0]
         const card = list.cards.filter( card => card.title === e.target.innerText )[0]
         const cardModal = modal(card) // DOM operations are async
-        // data = cardModal.getTitle()
         setTimeout( () => cardModal.open(), 0) // to see animation
     }
 })
@@ -312,9 +311,9 @@ function addListOrHideListInput() {
 * render lists and cards +
 * on click card show modal with card details +
 * render checklists +
-* update card title
+* update card title +
 *     1. AJAX GET data request and assign it to 'data' obj +
-*     2. on blur title AJAX POST request to change title
+*     2. on blur title AJAX POST request to change title +
 * description setter
 * mark card as done
 * list settings modal

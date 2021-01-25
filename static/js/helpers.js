@@ -1,17 +1,11 @@
 
-export function sendRequest(method, url, body = null) {
+export function sendRequest(method, url, body = null, headers = null) {
     const fetchInit = {
         method: method,
-        headers: {
-            'Content-Type': 'application/json; charset=UTF-8'
-        }
     }
 
     if (body !== null) fetchInit.body = JSON.stringify(body)
+    if (headers !== null) fetchInit.headers = headers
 
     return fetch(url, fetchInit).then(response => response.json())
-}
-
-export const hasProperty = (object, property) => {
-    Object.prototype.hasOwnProperty.call(object, property)
 }

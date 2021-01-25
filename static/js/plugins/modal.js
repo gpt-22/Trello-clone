@@ -1,4 +1,4 @@
-import {sendRequest, hasProperty} from './../helpers'
+import {sendRequest} from '../helpers'
 
 
 const checkListItemToHTML = item => `
@@ -48,7 +48,7 @@ function _createCardModal(options) {
             <div class="modal-container">
                 <div class="modal-header">
                     <input class="modal-title" type="text" placeholder="Название карточки" 
-                    value="${ hasProperty(options, 'title') ? options.title : 'Название карточки' }" data-title>
+                    value="${ 'title' in options ? options.title : 'Название карточки' }" data-title>
                     <span class="modal-close" data-close="true">&#10006;</span>
                 </div>
                 <div class="modal-body">
@@ -63,7 +63,7 @@ function _createCardModal(options) {
                             </div>
                         </div>
 
-                        ${ hasProperty(options, 'checklists') ? options.checklists.map(checkListToHTML).join('') : '' }
+                        ${ 'checklists' in options ? options.checklists.map(checkListToHTML).join('') : '' }
                     </div>
                     <div class="modal-col modal-col-right">
                         <div class="modal-add-block">
@@ -155,7 +155,7 @@ function _createOptionModal(options) {
         <div class="modal-container">
             <div class="modal-header">
                 <h3 class="modal-title" style="text-align: center;" data-title>
-                    ${ hasProperty(options, 'title') ? options.title : 'Название карточки' }
+                    ${ 'title' in options ? options.title : 'Название карточки' }
                 </h3>
                 <span class="modal-close" data-close="true">&#10006;</span>
             </div>
@@ -263,7 +263,7 @@ export const modal = function(options) {
     if (type === 'card') {
         $modalNode = _createCardModal(options)
         Object.assign(modal, getCardModalMethods($modalNode))
-        if (hasProperty(options, 'checklists'))
+        if ('checklists' in options)
             modal.setChecklistsEventListeners()
     } else $modalNode = _createOptionModal(options)
 
@@ -276,12 +276,20 @@ export const modal = function(options) {
         const body = {
             title: modalTitle.value
         }
-        // console.log(options)
-        // const listId = 1
-        // const requestURL = `http://localhost:3000/cards?listId=${ listId }`
-        // sendRequest('GET', requestURL, body)
-        //     .then(data => console.log(data))
-        //     .catch(err => console.log(err))
+
+        const csrfToken = document.cookie.match(/csrftoken=([\w-]+)/)[1]
+        const headers = {
+            'X-CSRFToken':  csrfToken,
+            'Content-Type': 'application/json; charset=UTF-8'
+        }
+
+        const listId = options.list
+        const cardId = options.id
+        const URL = `http://127.0.0.1:8000/api/boards/1/lists/${ listId }/cards/${ cardId }/`
+
+        sendRequest('PATCH', URL, body, headers)
+            .then(data => console.log(data))
+            .catch(err => console.log(err))
     })
 
     return modal
