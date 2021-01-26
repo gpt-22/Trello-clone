@@ -89,16 +89,33 @@ function _createCardModal(options) {
 }
 
 
+async function changeCardDescInDB(oldDesc, newDesc, listID, cardID) {
+    const body = {
+        description: newDesc
+    }
+    const csrfToken = document.cookie.match(/csrftoken=([\w-]+)/)[1]
+    const headers = {
+        'X-CSRFToken':  csrfToken,
+        'Content-Type': 'application/json; charset=UTF-8'
+    }
+    const URL = `http://127.0.0.1:8000/api/boards/1/lists/${ listID }/cards/${ cardID }/`
+    await sendRequest('PATCH', URL, body, headers)
+        .then(data => console.log(data))
+        .catch(err => console.log(err))
+}
+
+
 const getCardModalMethods = $modalNode => {
     return {
         setDescription(text) {
             $modalNode.querySelector('[data-desc]').innerText = text
         },
-        setModalDescriptionEventListeners() {
+        setModalDescriptionEventListeners(options) {
             const modalDesc = $modalNode.querySelector('.modal-description')
             const modalDescBtns = $modalNode.querySelector('.modal-desc-btns')
             modalDesc.addEventListener('focus', e => modalDescBtns.style.display = 'flex')
             modalDesc.addEventListener('blur', e => {
+                changeCardDescInDB(options.description, modalDesc.value, options.list, options.id)
                 modalDescBtns.style.display = 'none'
                 modalDesc.value === '' ? modalDesc.style.minHeight = '56px' : ''
             })
@@ -219,6 +236,24 @@ function getCopyCardModalBody(options) {
 }
 
 
+function changeCardTitleInDB(oldTitle, newTitle, listID, cardID) {
+    const body = {
+        title: newTitle
+    }
+    const csrfToken = document.cookie.match(/csrftoken=([\w-]+)/)[1]
+    const headers = {
+        'X-CSRFToken':  csrfToken,
+        'Content-Type': 'application/json; charset=UTF-8'
+    }
+    const URL = `http://127.0.0.1:8000/api/boards/1/lists/${ listID }/cards/${ cardID }/`
+    sendRequest('PATCH', URL, body, headers)
+        .then(data => console.log(data))
+        .catch(err => console.log(err))
+
+    changeCardTitleInList(listID, oldTitle, newTitle)
+}
+
+
 function changeCardTitleInList(listId, oldTitle, newTitle) {
     const list = document.getElementById('list' + listId)
     const cards = list.querySelectorAll('.card')
@@ -272,6 +307,7 @@ export const modal = function(options) {
     if (type === 'card') {
         $modalNode = _createCardModal(options)
         Object.assign(modal, getCardModalMethods($modalNode))
+        modal.setModalDescriptionEventListeners(options)
         if ('checklists' in options)
             modal.setChecklistsEventListeners()
     } else $modalNode = _createOptionModal(options)
@@ -280,25 +316,7 @@ export const modal = function(options) {
 
     const modalTitle = $modalNode.querySelector('.modal-title')
     modalTitle.addEventListener('blur', e => {
-        const body = {
-            title: modalTitle.value
-        }
-
-        const csrfToken = document.cookie.match(/csrftoken=([\w-]+)/)[1]
-        const headers = {
-            'X-CSRFToken':  csrfToken,
-            'Content-Type': 'application/json; charset=UTF-8'
-        }
-
-        const listId = options.list
-        const cardId = options.id
-        const URL = `http://127.0.0.1:8000/api/boards/1/lists/${ listId }/cards/${ cardId }/`
-
-        sendRequest('PATCH', URL, body, headers)
-            .then(data => console.log(data))
-            .catch(err => console.log(err))
-
-        changeCardTitleInList(listId, options.title, modalTitle.value)
+        changeCardTitleInDB(options.title, modalTitle.value, options.list, options.id)
     })
 
     return modal

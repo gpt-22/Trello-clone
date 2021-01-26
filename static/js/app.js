@@ -91,14 +91,22 @@ sendRequest('GET', getBoardURL)
 
 // Card modal
 
+async function openCardModal(e) {
+    // update data
+    await sendRequest('GET', getBoardURL)
+        .then(response => data = response)
+
+    const listID = +(e.target.parentNode.parentNode.id.match(/\d+/)[0])
+    const list = data.lists.filter( list => list.id === listID )[0]
+    const card = list.cards.filter( card => card.title === e.target.innerText.trim())[0]
+    const cardModal = modal(card) // DOM operations are async
+    setTimeout( () => cardModal.open(), 0) // to see animation
+}
+
 // optimized way to listen click on card instead of adding many eventListeners
 document.addEventListener('click', e => {
     if (e.target.classList.contains('card')) {
-        const listID = +(e.target.parentNode.parentNode.id.match(/\d+/)[0])
-        const list = data.lists.filter( list => list.id === listID )[0]
-        const card = list.cards.filter( card => card.title === e.target.innerText.trim())[0]
-        const cardModal = modal(card) // DOM operations are async
-        setTimeout( () => cardModal.open(), 0) // to see animation
+        openCardModal(e)
     }
 })
 
@@ -109,7 +117,7 @@ function getBeforeCard(container, y) {
     const notDraggingElements = [...container.querySelectorAll('.card:not(.dragging)')]
 
     const reducer = (closest, containerChild) => {
-        const containerChildRect = containerChild.getBoundingClientRect() // возвращает размер и позицию относительно viewport
+        const containerChildRect = containerChild.getBoundingClientRect() // return size and position
         const offset = y - containerChildRect.top - containerChildRect.height / 2
         if (offset < 0 && offset > closest.offset) return { offset: offset, element: containerChild }
         else return closest
@@ -123,7 +131,8 @@ function onOverList(e) {
     e.preventDefault() // enable drop event
     const beforeElement = getBeforeCard(this, e.clientY)
     const dragging = document.querySelector('.dragging')
-    beforeElement === null ? this.childNodes[3].appendChild(dragging) : this.childNodes[3].insertBefore(dragging, beforeElement)
+    if (beforeElement === null) this.childNodes[3].appendChild(dragging)
+    else this.childNodes[3].insertBefore(dragging, beforeElement)
 }
 
 
@@ -349,7 +358,7 @@ async function addListOrHideListInput() {
 * update card title +
 *     1. AJAX GET data request and assign it to 'data' obj +
 *     2. on blur title AJAX POST request to change title +
-* description setter
+* update description +
 * mark card as done
 * list settings modal
 * copy list
