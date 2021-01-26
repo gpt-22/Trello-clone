@@ -1,4 +1,4 @@
-import {sendRequest} from './helpers'
+import {sendRequest, isValidTitle} from './helpers'
 import {modal} from './plugins/modal'
 
 
@@ -22,36 +22,31 @@ let lists,
 const main = (response) => {
     data = response
 
-    render()
+    renderLists()
 
     board = document.querySelector('.board')
+    board.addEventListener('dragover', onOverBoard)
+
+    // add list block
     addListBlock = board.querySelector('.add-list-block')
-    showFormBtn = addListBlock.querySelector('.show-form-btn')
-    addListForm = addListBlock.querySelector('.add-list-form')
     formInput = addListBlock.querySelector('.add-list-input')
+    addListBlock.addEventListener('click', () => formInput.focus())
+    showFormBtn = addListBlock.querySelector('.show-form-btn')
+    showFormBtn.addEventListener('click', showAddListForm)
+    addListForm = addListBlock.querySelector('.add-list-form')
     addListBtn = addListBlock.querySelector('.add-list-btn')
+    addListBtn.addEventListener('click', addListOrHideListInput)
     cancelBtn = addListBlock.querySelector('.add-list-cancel-btn')
+    cancelBtn.addEventListener('click', hideAddListForm)
 
     lists = board.querySelectorAll('.list')
-    cards = board.querySelectorAll('.card')
-    addCardBtns = document.querySelectorAll('.add-card-btn')
-
-    board.addEventListener('dragover', onOverBoard)
     lists.forEach(list => addListEvents(list))
+    cards = board.querySelectorAll('.card')
     cards.forEach(card => addCardEvents(card))
+    addCardBtns = document.querySelectorAll('.add-card-btn')
     addCardBtns.forEach(btn => btn.addEventListener('click', addTextArea))
-    addListBlock.addEventListener('click', () => formInput.focus())
-    showFormBtn.addEventListener('click', showAddListForm)
-    cancelBtn.addEventListener('click', hideAddListForm)
-    addListBtn.addEventListener('click', addListOrHideListInput)
 }
 
-
-sendRequest('GET', getBoardURL)
-    .then(response => main(response))
-    .catch(err => console.log(err))
-
-//
 
 const cardToHTML = card => `<div class="list__item card" draggable="true">${ card.title }</div>`
 
@@ -82,11 +77,16 @@ const listToHTML = list => `
 </div>    
 `
 
-function render() {
+function renderLists() {
     const HTML = data.lists.map(listToHTML).join('')
     const app = document.getElementById('app')
     app.insertAdjacentHTML('afterbegin', HTML)
 }
+
+
+sendRequest('GET', getBoardURL)
+    .then(response => main(response))
+    .catch(err => console.log(err))
 
 
 // Card modal
@@ -94,8 +94,8 @@ function render() {
 // optimized way to listen click on card instead of adding many eventListeners
 document.addEventListener('click', e => {
     if (e.target.classList.contains('card')) {
-        const listID = e.target.parentNode.parentNode.id
-        const list = data.lists.filter( list => list.id === +listID.slice(-1) )[0]
+        const listID = +(e.target.parentNode.parentNode.id.match(/\d+/)[0])
+        const list = data.lists.filter( list => list.id === listID )[0]
         const card = list.cards.filter( card => card.title === e.target.innerText.trim())[0]
         const cardModal = modal(card) // DOM operations are async
         setTimeout( () => cardModal.open(), 0) // to see animation
@@ -187,27 +187,6 @@ function addCardEvents(card) {
 
 // create card
 
-function isValidTitle(titleText) {
-    const NUM = '1234567890'
-    const ENG = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    const RUS = 'абвгдеёжзийклмнопрстуфхцчшщъыьэюяАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'
-    const char = titleText.trim()[0]
-    return ENG.includes(char) || RUS.includes(char) || NUM.includes(char)
-}
-
-
-function createCardInDOM(title) {
-    const newCard = document.createElement('div')
-    newCard.className += 'list__item card'
-    newCard.setAttribute('draggable', 'true')
-    newCard.innerText = title
-    newCard.addEventListener('dragstart', cardOnDragStart)
-    newCard.addEventListener('dragend', cardOnDragEnd)
-
-    return newCard
-}
-
-
 function createCardInDB(listID, title) {
     const body = {
         list: listID,
@@ -219,9 +198,31 @@ function createCardInDB(listID, title) {
         'Content-Type': 'application/json; charset=UTF-8'
     }
     const URL = `http://127.0.0.1:8000/api/boards/1/lists/${ listID }/cards/`
-    sendRequest('POST', URL, body, headers)
-        .then(data => console.log(data))
-        .catch(err => console.log(err))
+    return sendRequest('POST', URL, body, headers)
+}
+
+
+function createCardInDOM(createdCard) {
+    const newCard = document.createElement('div')
+    newCard.className += 'list__item card'
+    newCard.setAttribute('draggable', 'true')
+    newCard.innerText = createdCard.title
+    newCard.addEventListener('dragstart', cardOnDragStart)
+    newCard.addEventListener('dragend', cardOnDragEnd)
+
+    return newCard
+}
+
+
+async function createCard(e, title, listBody, textArea) {
+    const listID = +(e.target.parentNode.parentNode.id.match(/\d+/)[0])
+    const createdCard = await createCardInDB(listID, title)
+    // update data
+    await sendRequest('GET', getBoardURL)
+        .then(response => data = response)
+
+    const newCard = createCardInDOM(createdCard)
+    listBody.insertBefore(newCard, textArea)
 }
 
 
@@ -229,16 +230,10 @@ function addCardOrHideTextArea(e) {
     const listBody = this.parentNode
     const title = this.value
     if (isValidTitle(title)) {
-        const listID = +(e.target.parentNode.parentNode.id.slice(-1))
-        createCardInDB(listID, title)
-        sendRequest('GET', getBoardURL)
-            .then(response => data = response)
-        const newCard = createCardInDOM(title)
-        listBody.insertBefore(newCard, this)
+        createCard(e, title, listBody, this)
         this.value = ''
         this.focus()
     } else listBody.removeChild(this)
-
     listBody.scrollTop = listBody.scrollHeight
 }
 
@@ -290,25 +285,44 @@ function listHTMLToNode(listHTML) {
 }
 
 
-function createList(title) {
-    const newList = {
-        id: data.lists.length + 1,
-        title: title,
-        cards: [],
+function createListInDB(title) {
+    const body = {
+        board: 1,
+        title: title
     }
-    data.lists.push(newList)
-    const URL = `http://127.0.0.1:8000/api/board//${ listId }`
-    sendRequest('POST', URL)
-    const newListNode = listHTMLToNode(listToHTML(newList))
-    addListEvents(newListNode)
-    newListNode.querySelector('.add-card-btn').addEventListener('click', addTextArea)
-    return newListNode
+    const csrfToken = document.cookie.match(/csrftoken=([\w-]+)/)[1]
+    const headers = {
+        'X-CSRFToken':  csrfToken,
+        'Content-Type': 'application/json; charset=UTF-8'
+    }
+    const URL = `http://127.0.0.1:8000/api/boards/1/lists/`
+    return sendRequest('POST', URL, body, headers)
 }
 
 
-function addListOrHideListInput() {
+function createListInDOM(createdList) {
+    const newList = listHTMLToNode(listToHTML(createdList))
+    addListEvents(newList)
+    newList.querySelector('.add-card-btn').addEventListener('click', addTextArea)
+
+    return newList
+}
+
+
+async function createList(title) {
+    const createdList = await createListInDB(title)
+    console.log(createdList.id)
+    // update data
+    await sendRequest('GET', getBoardURL)
+        .then(response => data = response)
+
+    return createListInDOM(createdList)
+}
+
+
+async function addListOrHideListInput() {
     if (isValidTitle(formInput.value)) {
-        const newList = createList(formInput.value)
+        const newList = await createList(formInput.value)
         board.insertBefore(newList, addListBlock)
         board.scrollLeft = board.scrollWidth
         lists = document.querySelectorAll('.list')
@@ -328,7 +342,7 @@ function addListOrHideListInput() {
 * drag&drop card +
 * drag&drop list +
 * create card +
-* create list
+* create list +
 * render lists and cards +
 * on click card show modal with card details +
 * render checklists +
