@@ -1,91 +1,24 @@
 import {sendRequest, getIDNum} from '../helpers'
-
-
-const checkListItemToHTML = item => `
-    <li class="checklist-item">
-        <div class="checklist-item-container">
-            <input type="checkbox" ${ item.done ? 'checked' : '' } />
-            <textarea class="checklist-item-title" rows="1">${ item.text }</textarea>
-        </div>
-    </li>
-`
-
-
-const checkListToHTML = checkList => `
-    <div class="checklist-block">
-        <div class="checklist-header">
-            <textarea class="checklist-title" rows="1"> ${ checkList.title } </textarea>
-            <button type="button" class="modal-btn default del-checklist-btn">Удалить</button>
-        </div>
-        <div class="checklist-body">
-            <div class="checklist-progress">
-            </div>
-            <div class="checklist-list-container">
-                <ul class="checklist-list">
-                    ${ checkList.items.map(checkListItemToHTML).join('') }
-                </ul>
-            </div>
-        </div>
-        <div class="checklist-footer">
-            <button type="button" class="modal-btn default checklist-add-item-btn">Добавить элемент</button>
-            <form class="checklist-add-form">
-                <textarea class="checklist-add-input" placeholder="Добавить элемент"></textarea>
-                <div class="checklist-add-form-btns">
-                    <button type="button" class="modal-btn primary">Сохранить</button>
-                    <button type="button" class="modal-btn default">&#10006;</button>
-                </div>                                    
-            </form>
-        </div>
-    </div>
-`
+import {
+    getCardModalInnerHTML,
+    getOptionModalInnerHTML,
+    getListSettingsModalBody,
+    getMarksModalBody,
+    getChecklistModalBody,
+    getExpirationModalBody,
+    getMoveCardModalBody,
+    getCopyCardModalBody
+} from "../get-html";
 
 
 function _createCardModal(options) {
-    const modal = document.createElement('div')
-    modal.classList.add('modal')
-    modal.classList.add('card-modal')
-    modal.insertAdjacentHTML('afterbegin', `
-        <div class="modal-overlay" data-close="true">
-            <div class="modal-container">
-                <div class="modal-header">
-                    <input class="modal-title" type="text" placeholder="Название карточки" 
-                           value="${ options.card.title }">
-                    <span class="modal-close" data-close="true">&#10006;</span>
-                </div>
-                <div class="modal-body">
-                    <div class="modal-col modal-col-left">
-                        <div class="modal-desc-block">
-                            <h3 class="modal-desc-title">Описание</h3>
-                            <textarea class="modal-description" placeholder="Добавьте более подробное описание..." 
-                                      data-desc >${ options.card.description ? options.card.description : '' }</textarea>
-                            <div class="modal-desc-btns">
-                                <button type="button" class="modal-btn primary">Сохранить</button>
-                                <button type="button" class="modal-btn default">&#10006;</button>
-                            </div>
-                        </div>
-                        ${ 'checklists' in options.card ? options.card.checklists.map(checkListToHTML).join('') : '' }
-                    </div>
-                    <div class="modal-col modal-col-right">
-                        <div class="modal-add-block">
-                            <span class="modal-add-title">Добавить на карточку</span>
-                            <button type="button" class="modal-btn default modal-mark-btn">Метку</button>
-                            <button type="button" class="modal-btn default modal-checklist-btn">Чек-лист</button>
-                            <button type="button" class="modal-btn default modal-datetime-btn">Срок</button>    
-                        </div>
-                        <div class="modal-actions-block">
-                            <span class="modal-actions-title">Действия</span>
-                            <button type="button" class="modal-btn default modal-move-btn">Переместить</button>
-                            <button type="button" class="modal-btn default modal-copy-btn">Копировать</button>
-                            <button type="button" class="modal-btn danger modal-delete-btn">Удалить</button>    
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>    
-    `)
-    document.body.appendChild(modal)
+    const modalNode = document.createElement('div')
+    modalNode.classList.add('modal')
+    modalNode.classList.add('card-modal')
+    modalNode.insertAdjacentHTML('afterbegin', getCardModalInnerHTML(options.card))
+    document.body.appendChild(modalNode)
 
-    return modal
+    return modalNode
 }
 
 
@@ -130,7 +63,6 @@ async function changeCardDescInDB(oldDesc, newDesc, listID, cardID) {
         .then(data => console.log(data))
         .catch(err => console.log(err))
 }
-
 
 
 const getCardModalMethods = $modalNode => {
@@ -192,7 +124,6 @@ const getCardModalMethods = $modalNode => {
             // })
         },
         setChecklistItemsEventListeners() {},
-
         delete(listID, cardID) {
             // 1. delete from db
             const csrfToken = document.cookie.match(/csrftoken=([\w-]+)/)[1]
@@ -204,88 +135,63 @@ const getCardModalMethods = $modalNode => {
             sendRequest('DELETE', URL, null, headers)
                 .catch(err => console.log(err))
 
-            // 3. delete card from DOM
-            const lists = document.querySelectorAll('.list')
-            for (let i = 0; i < lists.length; ++i) {
-                if (getIDNum(lists[i].id) === listID) {
-                    const cards = lists[i].querySelectorAll('.card')
-                    for (let j = 0; j < cards.length; ++j) {
-                        if (getIDNum(cards[j].id) === cardID) {
-                            const cardNode = cards[j]
-                            // remove all event listeners
-                            const cardClone = cardNode.cloneNode(true)
-                            cardNode.parentNode.replaceChild(cardClone, cardNode)
-                            // remove from DOM
-                            cardClone.parentNode.removeChild(cardClone)
-                            break
-                        }
-                    }
-                    break
-                }
-            }
             // 2. close and destroy modal
             this.close()
-        }
 
+            // 3. delete card from DOM
+            const cardNode = document.getElementById('card' + cardID)
+            // remove all event listeners
+            const cardClone = cardNode.cloneNode(true)
+            cardNode.parentNode.replaceChild(cardClone, cardNode)
+            // remove from DOM
+            cardClone.parentNode.removeChild(cardClone)
+        }
     }
 }
 
 
-function _createOptionModal(options, optionsContainer) {
+function _createOptionModal(options, body, optionsContainer) {
     const modal = document.createElement('div')
     modal.classList.add('modal')
     modal.classList.add('settings-modal')
-    modal.insertAdjacentHTML('afterbegin', `
-        <div class="modal-container">
-            <div class="modal-header">
-                <h3 class="modal-title" >Действия со списком</h3>
-                <span class="modal-close" data-close="true">&#10006;</span>                
-            </div>
-            <div class="modal-body">
-                ${ getOptionBody(options) }            
-            </div>
-        </div>
-    `)
+    modal.insertAdjacentHTML('afterbegin', getOptionModalInnerHTML(body))
     optionsContainer.appendChild(modal)
 
     return modal
 }
 
 
-function getOptionBody(options) {
-    const type = options.type
-    switch (type) {
-        case 'listSettings':
-            return  getListSettingsModalBody()
-        case 'marks':
-            return getMarksModalBody(options)
-        case 'checklist':
-            return getChecklistModalBody(options)
-        case 'expiration':
-            return getExpirationModalBody(options)
-        case 'moveCard':
-            return getMoveCardModalBody(options)
-        case 'copyCard':
-            return getCopyCardModalBody(options)
+const getListSettingsModalMethods = ($modalNode, listID) => {
+    return {
+        setEventListeners() {
+            const addCardBtn = $modalNode.querySelector('.settings-modal-add-card-btn')
+            addCardBtn.addEventListener('click', e => {
+                this.close()
+                const list = document.getElementById('list'+listID)
+                const addCardBtn = list.querySelector('.add-card-btn')
+                addCardBtn.click()
+            })
+            const copyListBtn = $modalNode.querySelector('.settings-modal-copy-list-btn')
+            copyListBtn.addEventListener('click', e => {
+                // create new list with event listeners
+
+                // add to board
+                const board = document.querySelector('.board')
+                const addListBlock = board.querySelector('.add-list-block')
+                // board.insertBefore(newList, addListBlock)
+                board.scrollLeft = board.scrollWidth
+            })
+            const delAllCardsBtn = $modalNode.querySelector('.settings-modal-delete-all-cards-btn')
+            delAllCardsBtn.addEventListener('click', e => {
+
+            })
+            const delListBtn = $modalNode.querySelector('.settings-modal-delete-list-btn')
+            delListBtn.addEventListener('click', e => {
+
+            })
+        }
     }
 }
-
-
-function getListSettingsModalBody() {
-    return `
-        <button>Добавить карточку</button>
-        <button>Копировать список</button>
-        <button>Удалить все карточки списка</button>
-        <button>Удалить список</button>
-    `
-}
-
-
-function getMarksModalBody(options) {}
-function getChecklistModalBody(options) {}
-function getExpirationModalBody(options) {}
-function getMoveCardModalBody(options) {}
-function getCopyCardModalBody(options) {}
 
 
 export const modal = function(options, afterNode = null) {
@@ -339,15 +245,27 @@ export const modal = function(options, afterNode = null) {
         })
         const deleteBtn = $modalNode.querySelector('.modal-delete-btn')
         deleteBtn.addEventListener('click', e => modal.delete(options.card.list, options.card.id))
-    } else {
-        $modalNode = _createOptionModal(options, afterNode)
+    } else if (type === 'listSettings') {
+        $modalNode = _createOptionModal(options, getListSettingsModalBody(options), afterNode)
+        Object.assign(modal, getListSettingsModalMethods($modalNode, options.listID))
+        modal.setEventListeners($modalNode)
+    } else if (type === 'marks') {
+        $modalNode = _createOptionModal(options, getMarksModalBody(options), afterNode)
+    } else if (type === 'checklist') {
+        $modalNode = _createOptionModal(options, getChecklistModalBody(options), afterNode)
+    } else if (type === 'expiration') {
+        $modalNode = _createOptionModal(options, getExpirationModalBody(options), afterNode)
+    } else if (type === 'moveCard') {
+        $modalNode = _createOptionModal(options, getMoveCardModalBody(options), afterNode)
+    } else if (type === 'copyCard') {
+        $modalNode = _createOptionModal(options, getCopyCardModalBody(options), afterNode)
     }
+
 
     $modalNode.addEventListener('click', e => (e.target.dataset.close === 'true') ? modal.close() : '')
 
     return modal
 }
-
 
 
 // modal -> overlay -> container -> header / body / footer

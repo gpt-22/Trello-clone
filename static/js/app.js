@@ -1,4 +1,5 @@
 import {sendRequest, isValidTitle, getIDNum} from './helpers'
+import {listToHTML} from "./get-html";
 import {modal} from './plugins/modal'
 
 
@@ -48,28 +49,6 @@ const main = (response) => {
 }
 
 
-const cardToHTML = card => `<div class="list__item card" draggable="true" id="card${ card.id }">${ card.title }</div>`
-
-
-const listToHTML = list => `
-<div id="list${ list.id }" class="list" draggable="true">
-    <div class="list__header">
-        <input type="text" class="list__title" value="${ list.title }">
-        <div class="options-container">
-            <img src="static/img/list-settings.png" alt="options" class="list__options">
-        </div> 
-    </div>
-    <div class="list__body">
-        ${ list.cards.map(cardToHTML).join('') }
-    </div>
-    <div class="list__footer">
-        <button class="add-card-btn">
-            Добавить карточку
-        </button>
-    </div>
-</div>    
-`
-
 function renderLists() {
     const HTML = data.lists.map(listToHTML).join('')
     const app = document.getElementById('app')
@@ -103,9 +82,10 @@ async function showCardModal(e) {
 
 
 function showSettingsModal(e, settingsContainer) {
+    const listID = getIDNum(e.target.parentNode.parentNode.parentNode.id)
     const modalSettings = {
         type: "listSettings",
-
+        listID: listID
     }
     const settingsModal = modal(modalSettings, settingsContainer)
     setTimeout( () => settingsModal.open(), 0)
@@ -236,7 +216,7 @@ function createCardInDB(listID, title) {
 
 function createCardInDOM(createdCard) {
     const newCard = document.createElement('div')
-    newCard.id = createdCard.id
+    newCard.id = 'card' + createdCard.id
     newCard.className += 'list__item card'
     newCard.setAttribute('draggable', 'true')
     newCard.innerText = createdCard.title
