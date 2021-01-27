@@ -1,11 +1,12 @@
 
-
 .modal {}
+
 .modal-overlay,
 .modal-container {
     opacity: 0;
     z-index: -1;
 }
+
 .modal-overlay {
   position: fixed;
   height: 100%;
@@ -19,14 +20,9 @@
   background-color: rgba(0, 0, 0, 0);
   transition: background-color .5s;
 }
+
 .modal-container {
   background-color: #fff;
-  width: 600px;
-  margin: 50px 0 80px;
-  padding: 10px;
-  border-radius: 10px;
-  transform: translateY(-600px);
-  transition: transform .5s;
 }
 .modal.open .modal-overlay,
 .modal.open .modal-container {
@@ -59,16 +55,31 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 10px;
   border-bottom: 1px solid rgb(236, 236, 236);
 }
-.modal-title {
+
+
+
+/* Card modal */
+
+.card-modal .modal-container {
+  width: 600px;
+  margin: 50px 0 80px;
+  padding: 10px;
+  border-radius: 10px;
+  transform: translateY(-600px);
+  transition: transform .5s;
+}
+.card-modal .modal-header {
+  padding-bottom: 10px;
+}
+.card-modal .modal-title {
   width: 100%;
   margin-right: 5px;
   font-size: 1.25rem;
   font-weight: 600;
 }
-.modal-close {
+.card-modal .modal-close {
   box-sizing: border-box;
   width: 35px;
   height: 35px;
@@ -78,29 +89,25 @@
   cursor: pointer;
   transition: background-color .3s;
 }
-.modal-close:hover {
+.card-modal .modal-close:hover {
   background-color: rgb(235, 233, 233);
 }
 
-.modal-body {
+.card-modal .modal-body {
   display: grid;
   grid-template-columns: 3fr 1fr;
   padding: 20px 10px;
 }
-.modal-col {}
-.modal-col-left {
+.card-modal .modal-col {}
+.card-modal .modal-col-left {
   margin-right: 20px;
 }
-
-
 .modal-desc-title,
 .checklist-title {
   font-size: 16px;
   font-weight: bold;
   margin: 6px 0;
 }
-
-
 .modal-desc-block {
   margin-bottom: 20px;
 }
@@ -230,4 +237,58 @@
 
 .modal-delete-btn {}
 
+/* Settings modal */
+.settings-modal {
+  position: absolute;
+  left: 1.5px;
+  bottom: -185px;
+}
+.settings-modal .modal-container {
+  background-color: #fff;
+  width: 280px;
+  border: 1px solid rgb(236, 236, 236);
+  border-radius: 3px;
+}
+.settings-modal .modal-header {}
+.settings-modal .modal-title {
+  margin: 0;
+  padding: 9px 8px 9px 70px;
+  font-weight: normal;
+  font-size: 14px;
+}
+.settings-modal .modal-close {
+  box-sizing: border-box;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  line-height: 35px;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color .3s;
+}
+.settings-modal .modal-close:hover {
+  background-color: rgb(235, 233, 233);
+}
+.settings-modal .modal-body {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 0;
+}
+.settings-modal button {
+  width: 100%;
+  height: 32px;
+  border: none;
+  outline: none;
+  background-color: #fff;
+  text-align: left;
+  color: #172b4d;
+}
+.settings-modal button:hover {
+  background-color: rgb(235, 233, 233);
+}
 
+/* TODO:
+* card modal styles
+* settings modal styles
+
+*/

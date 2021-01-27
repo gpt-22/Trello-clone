@@ -1,4 +1,4 @@
-import {sendRequest} from '../helpers'
+import {sendRequest, getIDNum} from '../helpers'
 
 
 const checkListItemToHTML = item => `
@@ -43,12 +43,13 @@ const checkListToHTML = checkList => `
 function _createCardModal(options) {
     const modal = document.createElement('div')
     modal.classList.add('modal')
+    modal.classList.add('card-modal')
     modal.insertAdjacentHTML('afterbegin', `
         <div class="modal-overlay" data-close="true">
             <div class="modal-container">
                 <div class="modal-header">
                     <input class="modal-title" type="text" placeholder="Название карточки" 
-                    value="${ 'title' in options ? options.title : 'Название карточки' }" data-title>
+                           value="${ options.card.title }">
                     <span class="modal-close" data-close="true">&#10006;</span>
                 </div>
                 <div class="modal-body">
@@ -56,14 +57,13 @@ function _createCardModal(options) {
                         <div class="modal-desc-block">
                             <h3 class="modal-desc-title">Описание</h3>
                             <textarea class="modal-description" placeholder="Добавьте более подробное описание..." 
-                                      data-desc >${ options.description ? options.description : '' }</textarea>
+                                      data-desc >${ options.card.description ? options.card.description : '' }</textarea>
                             <div class="modal-desc-btns">
                                 <button type="button" class="modal-btn primary">Сохранить</button>
                                 <button type="button" class="modal-btn default">&#10006;</button>
                             </div>
                         </div>
-
-                        ${ 'checklists' in options ? options.checklists.map(checkListToHTML).join('') : '' }
+                        ${ 'checklists' in options.card ? options.card.checklists.map(checkListToHTML).join('') : '' }
                     </div>
                     <div class="modal-col modal-col-right">
                         <div class="modal-add-block">
@@ -89,6 +89,33 @@ function _createCardModal(options) {
 }
 
 
+function changeCardTitleInDB(oldTitle, newTitle, listID, cardID) {
+    const body = {
+        title: newTitle
+    }
+    const csrfToken = document.cookie.match(/csrftoken=([\w-]+)/)[1]
+    const headers = {
+        'X-CSRFToken':  csrfToken,
+        'Content-Type': 'application/json; charset=UTF-8'
+    }
+    const URL = `http://127.0.0.1:8000/api/boards/1/lists/${ listID }/cards/${ cardID }/`
+    sendRequest('PATCH', URL, body, headers)
+        .then(data => console.log(data))
+        .catch(err => console.log(err))
+
+    changeCardTitleInList(listID, oldTitle, newTitle)
+}
+
+
+function changeCardTitleInList(listId, oldTitle, newTitle) {
+    const list = document.getElementById('list' + listId)
+    const cards = list.querySelectorAll('.card')
+    cards.forEach(card => {
+        if (card.innerText === oldTitle) card.innerText = newTitle
+    })
+}
+
+
 async function changeCardDescInDB(oldDesc, newDesc, listID, cardID) {
     const body = {
         description: newDesc
@@ -105,17 +132,23 @@ async function changeCardDescInDB(oldDesc, newDesc, listID, cardID) {
 }
 
 
+
 const getCardModalMethods = $modalNode => {
     return {
-        setDescription(text) {
-            $modalNode.querySelector('[data-desc]').innerText = text
+        close() {
+            $modalNode.classList.remove('open')
+            $modalNode.classList.add('hiding')
+            setTimeout( () => {
+                $modalNode.classList.remove('hiding')
+                this.destroy()
+            }, 500)
         },
         setModalDescriptionEventListeners(options) {
             const modalDesc = $modalNode.querySelector('.modal-description')
             const modalDescBtns = $modalNode.querySelector('.modal-desc-btns')
             modalDesc.addEventListener('focus', e => modalDescBtns.style.display = 'flex')
             modalDesc.addEventListener('blur', e => {
-                changeCardDescInDB(options.description, modalDesc.value, options.list, options.id)
+                changeCardDescInDB(options.card.description, modalDesc.value, options.card.list, options.card.id)
                 modalDescBtns.style.display = 'none'
                 modalDesc.value === '' ? modalDesc.style.minHeight = '56px' : ''
             })
@@ -158,30 +191,62 @@ const getCardModalMethods = $modalNode => {
             //     })
             // })
         },
-        setChecklistItemsEventListeners() {
+        setChecklistItemsEventListeners() {},
 
+        delete(listID, cardID) {
+            // 1. delete from db
+            const csrfToken = document.cookie.match(/csrftoken=([\w-]+)/)[1]
+            const headers = {
+                'X-CSRFToken':  csrfToken,
+                'Content-Type': 'application/json; charset=UTF-8'
+            }
+            const URL = `http://127.0.0.1:8000/api/boards/1/lists/${ listID }/cards/${ cardID }/`
+            sendRequest('DELETE', URL, null, headers)
+                .catch(err => console.log(err))
+
+            // 3. delete card from DOM
+            const lists = document.querySelectorAll('.list')
+            for (let i = 0; i < lists.length; ++i) {
+                if (getIDNum(lists[i].id) === listID) {
+                    const cards = lists[i].querySelectorAll('.card')
+                    for (let j = 0; j < cards.length; ++j) {
+                        if (getIDNum(cards[j].id) === cardID) {
+                            const cardNode = cards[j]
+                            // remove all event listeners
+                            const cardClone = cardNode.cloneNode(true)
+                            cardNode.parentNode.replaceChild(cardClone, cardNode)
+                            // remove from DOM
+                            cardClone.parentNode.removeChild(cardClone)
+                            break
+                        }
+                    }
+                    break
+                }
+            }
+            // 2. close and destroy modal
+            this.close()
         }
+
     }
 }
 
 
-function _createOptionModal(options) {
+function _createOptionModal(options, optionsContainer) {
     const modal = document.createElement('div')
     modal.classList.add('modal')
+    modal.classList.add('settings-modal')
     modal.insertAdjacentHTML('afterbegin', `
         <div class="modal-container">
             <div class="modal-header">
-                <h3 class="modal-title" style="text-align: center;" data-title>
-                    ${ 'title' in options ? options.title : 'Название карточки' }
-                </h3>
-                <span class="modal-close" data-close="true">&#10006;</span>
+                <h3 class="modal-title" >Действия со списком</h3>
+                <span class="modal-close" data-close="true">&#10006;</span>                
             </div>
             <div class="modal-body">
-                ${ getOptionBody(options) }
+                ${ getOptionBody(options) }            
             </div>
         </div>
     `)
-    document.body.appendChild(modal)
+    optionsContainer.appendChild(modal)
 
     return modal
 }
@@ -191,7 +256,7 @@ function getOptionBody(options) {
     const type = options.type
     switch (type) {
         case 'listSettings':
-            return  getListSettingsModalBody(options)
+            return  getListSettingsModalBody()
         case 'marks':
             return getMarksModalBody(options)
         case 'checklist':
@@ -206,64 +271,24 @@ function getOptionBody(options) {
 }
 
 
-function getListSettingsModalBody(options) {
-
+function getListSettingsModalBody() {
+    return `
+        <button>Добавить карточку</button>
+        <button>Копировать список</button>
+        <button>Удалить все карточки списка</button>
+        <button>Удалить список</button>
+    `
 }
 
 
-function getMarksModalBody(options) {
-
-}
-
-
-function getChecklistModalBody(options) {
-
-}
+function getMarksModalBody(options) {}
+function getChecklistModalBody(options) {}
+function getExpirationModalBody(options) {}
+function getMoveCardModalBody(options) {}
+function getCopyCardModalBody(options) {}
 
 
-function getExpirationModalBody(options) {
-
-}
-
-
-function getMoveCardModalBody(options) {
-
-}
-
-
-function getCopyCardModalBody(options) {
-
-}
-
-
-function changeCardTitleInDB(oldTitle, newTitle, listID, cardID) {
-    const body = {
-        title: newTitle
-    }
-    const csrfToken = document.cookie.match(/csrftoken=([\w-]+)/)[1]
-    const headers = {
-        'X-CSRFToken':  csrfToken,
-        'Content-Type': 'application/json; charset=UTF-8'
-    }
-    const URL = `http://127.0.0.1:8000/api/boards/1/lists/${ listID }/cards/${ cardID }/`
-    sendRequest('PATCH', URL, body, headers)
-        .then(data => console.log(data))
-        .catch(err => console.log(err))
-
-    changeCardTitleInList(listID, oldTitle, newTitle)
-}
-
-
-function changeCardTitleInList(listId, oldTitle, newTitle) {
-    const list = document.getElementById('list' + listId)
-    const cards = list.querySelectorAll('.card')
-    cards.forEach(card => {
-        if (card.innerText === oldTitle) card.innerText = newTitle
-    })
-}
-
-
-export const modal = function(options) {
+export const modal = function(options, afterNode = null) {
     // closure -> access to private fields/methods
 
     // modal types:
@@ -276,9 +301,14 @@ export const modal = function(options) {
     // 'copyCard'
 
     options = typeof options !== 'undefined' ? options : {}
+
     const type = options.type ? options.type : 'card'
+    const overlay = options.overlay ? options.overlay : true
+    const animateOpenClose = options.animateOpenClose ? options.animateOpenClose : true
+
     let isDestroyed = false
     let $modalNode
+
 
     const modal = {
         open() {
@@ -287,20 +317,13 @@ export const modal = function(options) {
         },
         close() {
             $modalNode.classList.remove('open')
-            $modalNode.classList.add('hiding')
-            setTimeout( () => {
-                $modalNode.classList.remove('hiding')
-                this.destroy()
-            }, 500)
+            this.destroy()
         },
         destroy() {
             const $modalClone = $modalNode.cloneNode(true)
             $modalNode.parentNode.replaceChild($modalClone, $modalNode)
             $modalClone.parentNode.removeChild($modalClone)
             isDestroyed = true
-        },
-        setTitle(text) {
-            $modalNode.querySelector('[data-title]').innerText = text
         },
     }
 
@@ -310,14 +333,26 @@ export const modal = function(options) {
         modal.setModalDescriptionEventListeners(options)
         if ('checklists' in options)
             modal.setChecklistsEventListeners()
-    } else $modalNode = _createOptionModal(options)
+        const modalTitle = $modalNode.querySelector('.modal-title')
+        modalTitle.addEventListener('blur', e => {
+            changeCardTitleInDB(options.title, modalTitle.value, options.list, options.id)
+        })
+        const deleteBtn = $modalNode.querySelector('.modal-delete-btn')
+        deleteBtn.addEventListener('click', e => modal.delete(options.card.list, options.card.id))
+    } else {
+        $modalNode = _createOptionModal(options, afterNode)
+    }
 
     $modalNode.addEventListener('click', e => (e.target.dataset.close === 'true') ? modal.close() : '')
 
-    const modalTitle = $modalNode.querySelector('.modal-title')
-    modalTitle.addEventListener('blur', e => {
-        changeCardTitleInDB(options.title, modalTitle.value, options.list, options.id)
-    })
-
     return modal
 }
+
+
+
+// modal -> overlay -> container -> header / body / footer
+// modal -> container -> header / body / footer
+// options:
+// * type
+// * overlay
+// * animateOpenClose

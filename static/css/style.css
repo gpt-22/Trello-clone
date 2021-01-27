@@ -89,6 +89,9 @@ textarea:focus {
   font-weight: 600;
   font-size: 16px;
 }
+.options-container {
+  position: relative;
+}
 .list__options {
   margin: 2px;
   height: 28px;
@@ -147,12 +150,6 @@ textarea:focus {
 }
 .add-card-btn:hover {
   background-color: #ddd;
-}
-.add-card-btn > svg {
-  color: #5e6c84;
-  position: relative;
-  top: 3px;
-  left: 0px;
 }
 .add-card-text {
   overflow: hidden;

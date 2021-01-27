@@ -1,4 +1,4 @@
-import {sendRequest, isValidTitle} from './helpers'
+import {sendRequest, isValidTitle, getIDNum} from './helpers'
 import {modal} from './plugins/modal'
 
 
@@ -48,30 +48,23 @@ const main = (response) => {
 }
 
 
-const cardToHTML = card => `<div class="list__item card" draggable="true">${ card.title }</div>`
+const cardToHTML = card => `<div class="list__item card" draggable="true" id="card${ card.id }">${ card.title }</div>`
 
 
 const listToHTML = list => `
 <div id="list${ list.id }" class="list" draggable="true">
     <div class="list__header">
         <input type="text" class="list__title" value="${ list.title }">
-        <div class="list__options">
-            <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" data-svg="more">
-                <circle cx="5"  cy="10" r="1.2"></circle>
-                <circle cx="10" cy="10" r="1.2"></circle>
-                <circle cx="15" cy="10" r="1.2"></circle>
-            </svg>                
-        </div>
+        <div class="options-container">
+            <img src="static/img/list-settings.png" alt="options" class="list__options">
+        </div> 
     </div>
     <div class="list__body">
         ${ list.cards.map(cardToHTML).join('') }
     </div>
     <div class="list__footer">
         <button class="add-card-btn">
-            <svg width="16" height="16" fill="#888" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" data-svg="plus">
-                <rect x="9" y="1" width="2" height="17" rx="2"></rect>
-                <rect x="1" y="9" width="17" height="2" rx="2"></rect>
-            </svg>    
+            Добавить карточку
         </button>
     </div>
 </div>    
@@ -91,22 +84,52 @@ sendRequest('GET', getBoardURL)
 
 // Card modal
 
-async function openCardModal(e) {
+async function showCardModal(e) {
     // update data
     await sendRequest('GET', getBoardURL)
         .then(response => data = response)
 
-    const listID = +(e.target.parentNode.parentNode.id.match(/\d+/)[0])
+    const listID = getIDNum(e.target.parentNode.parentNode.id)
     const list = data.lists.filter( list => list.id === listID )[0]
     const card = list.cards.filter( card => card.title === e.target.innerText.trim())[0]
-    const cardModal = modal(card) // DOM operations are async
+    const options = {
+        card: card,
+        overlay: true,
+        animateOpenClose: true
+    }
+    const cardModal = modal(options) // DOM operations are async
     setTimeout( () => cardModal.open(), 0) // to see animation
 }
+
+
+function showSettingsModal(e, settingsContainer) {
+    const modalSettings = {
+        type: "listSettings",
+
+    }
+    const settingsModal = modal(modalSettings, settingsContainer)
+    setTimeout( () => settingsModal.open(), 0)
+    return settingsModal
+}
+
 
 // optimized way to listen click on card instead of adding many eventListeners
 document.addEventListener('click', e => {
     if (e.target.classList.contains('card')) {
-        openCardModal(e)
+        showCardModal(e)
+    } else if (e.target.classList.contains('list__options')) {
+        const settingsContainer = e.target.parentNode
+
+        if (settingsContainer.children.length === 1)
+            showSettingsModal(e, settingsContainer)
+        else {
+            const modalNode = e.target.parentNode.querySelector('.settings-modal')
+            // remove all event listeners
+            const modalClone = modalNode.cloneNode(true)
+            modalNode.parentNode.replaceChild(modalClone, modalNode)
+            // remove from DOM
+            modalClone.parentNode.removeChild(modalClone)
+        }
     }
 })
 
@@ -213,6 +236,7 @@ function createCardInDB(listID, title) {
 
 function createCardInDOM(createdCard) {
     const newCard = document.createElement('div')
+    newCard.id = createdCard.id
     newCard.className += 'list__item card'
     newCard.setAttribute('draggable', 'true')
     newCard.innerText = createdCard.title
@@ -224,7 +248,7 @@ function createCardInDOM(createdCard) {
 
 
 async function createCard(e, title, listBody, textArea) {
-    const listID = +(e.target.parentNode.parentNode.id.match(/\d+/)[0])
+    const listID = getIDNum(e.target.parentNode.parentNode.id)
     const createdCard = await createCardInDB(listID, title)
     // update data
     await sendRequest('GET', getBoardURL)
@@ -348,23 +372,29 @@ async function addListOrHideListInput() {
 
 
 /* TODO:
+*---------------
 * drag&drop card +
 * drag&drop list +
-* create card +
-* create list +
+* save dropped card in list (update db)
+* save dropped list in position (update db)
+* --------------
 * render lists and cards +
+*---------------
+* create card +
 * on click card show modal with card details +
-* render checklists +
 * update card title +
 *     1. AJAX GET data request and assign it to 'data' obj +
 *     2. on blur title AJAX POST request to change title +
 * update description +
-* mark card as done
+* render checklists +
+* delete card
+*--------------- 27.01
+* create list +
 * list settings modal
 * copy list
 * delete all list cards
 * delete list
-* delete card
+*---------------
 * marks modal
 * add/remove mark
 * checklist modal
@@ -376,4 +406,5 @@ async function addListOrHideListInput() {
 * move card
 * copy card modal
 * copy card
+* mark card as done
 **/
