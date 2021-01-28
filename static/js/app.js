@@ -167,11 +167,11 @@ main()
 * update description +
 * render checklists +
 * delete card +
-*--------------- 27.01
+*---------------
 * create list +
 * list settings modal +
 * add card +
-* copy list +-
+* copy list +- (fix marks & checklists copying)
 * delete all list cards
 * delete list
 *---------------

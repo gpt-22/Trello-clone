@@ -1,3 +1,5 @@
+import {deleteFromDOMbyID} from "./html";
+import {getIDNum} from "./helpers";
 
 export function sendRequest(method, url, body = null, headers = null) {
     const fetchInit = {
@@ -9,6 +11,17 @@ export function sendRequest(method, url, body = null, headers = null) {
     return fetch(url, fetchInit).then(response => {
         if (method !== 'DELETE') return response.json()
     })
+}
+
+
+export function deleteFromDB(url) {
+    const csrfToken = document.cookie.match(/csrftoken=([\w-]+)/)[1]
+    const headers = {
+        'X-CSRFToken':  csrfToken,
+        'Content-Type': 'application/json; charset=UTF-8'
+    }
+    sendRequest('DELETE', url, null, headers)
+        .catch(err => console.log(err))
 }
 
 

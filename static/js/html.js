@@ -2,10 +2,21 @@ import {cardOnDragEnd, cardOnDragStart, onOverList} from "./drag-n-drop";
 import {getIDNum, isValidTitle} from "./helpers";
 import {createCardInDB, createListInDB} from "./db-requests";
 
+
 export function HTMLToNode(HTML) {
     const div = document.createElement('div');
     div.innerHTML = HTML.trim();
     return div.firstChild;
+}
+
+
+export function deleteFromDOMbyID(ID) {
+    const node = document.getElementById(ID)
+    // remove all event listeners
+    const nodeClone = node.cloneNode(true)
+    node.parentNode.replaceChild(nodeClone, node)
+    // remove from DOM
+    nodeClone.parentNode.removeChild(nodeClone)
 }
 
 

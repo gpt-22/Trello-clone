@@ -1,5 +1,5 @@
 import {
-    sendRequest, changeCardTitleInDB, changeCardDescInDB, createListInDB, createCardInDB
+    sendRequest, changeCardTitleInDB, changeCardDescInDB, createListInDB, createCardInDB, deleteFromDB
 } from "../db-requests";
 import {
     getCardModalInnerHTML,
@@ -10,8 +10,11 @@ import {
     getExpirationModalBody,
     getMoveCardModalBody,
     getCopyCardModalBody,
-    createCardInDOM, createListInDOM,
+    createCardInDOM,
+    createListInDOM,
+    deleteFromDOMbyID,
 } from "../html";
+import {getIDNum} from "../helpers";
 
 
 function _createCardModal(options) {
@@ -94,26 +97,10 @@ const getCardModalMethods = $modalNode => {
         },
         setChecklistItemsEventListeners() {},
         delete(listID, cardID) {
-            // 1. delete from db
-            const csrfToken = document.cookie.match(/csrftoken=([\w-]+)/)[1]
-            const headers = {
-                'X-CSRFToken':  csrfToken,
-                'Content-Type': 'application/json; charset=UTF-8'
-            }
-            const URL = `http://127.0.0.1:8000/api/boards/1/lists/${ listID }/cards/${ cardID }/`
-            sendRequest('DELETE', URL, null, headers)
-                .catch(err => console.log(err))
-
-            // 2. close and destroy modal
+            const url = `http://127.0.0.1:8000/api/boards/1/lists/${ listID }/cards/${ cardID }/`
+            deleteFromDB(url)
             this.close()
-
-            // 3. delete card from DOM
-            const cardNode = document.getElementById('card' + cardID)
-            // remove all event listeners
-            const cardClone = cardNode.cloneNode(true)
-            cardNode.parentNode.replaceChild(cardClone, cardNode)
-            // remove from DOM
-            cardClone.parentNode.removeChild(cardClone)
+            deleteFromDOMbyID('card'+cardID)
         }
     }
 }
@@ -166,14 +153,26 @@ const getListSettingsModalMethods = ($modalNode, listID) => {
                 const addListBlock = board.querySelector('.add-list-block')
                 board.insertBefore(createdListNode, addListBlock)
                 board.scrollLeft = board.scrollWidth
+                this.close()
            })
             const delAllCardsBtn = $modalNode.querySelector('.settings-modal-delete-all-cards-btn')
             delAllCardsBtn.addEventListener('click', e => {
-
+                const listNode = document.getElementById('list' + listID)
+                const cardNodes = listNode.querySelectorAll('.card')
+                const ids = Array.from(cardNodes).map(card => card.id)
+                ids.forEach(idStr => {
+                    const cardID = getIDNum(idStr)
+                    const url = `http://127.0.0.1:8000/api/boards/1/lists/${ listID }/cards/${ cardID }/`
+                    deleteFromDB(url)
+                    deleteFromDOMbyID('card' + cardID)
+                })
+                this.close()
             })
             const delListBtn = $modalNode.querySelector('.settings-modal-delete-list-btn')
             delListBtn.addEventListener('click', e => {
-
+                const url = `http://127.0.0.1:8000/api/boards/1/lists/${ listID }/`
+                deleteFromDB(url)
+                deleteFromDOMbyID('list' + listID)
             })
         }
     }
