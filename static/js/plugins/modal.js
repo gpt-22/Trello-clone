@@ -1,4 +1,6 @@
-import {sendRequest, getIDNum} from '../helpers'
+import {
+    sendRequest, changeCardTitleInDB, changeCardDescInDB, createListInDB, createCardInDB
+} from "../db-requests";
 import {
     getCardModalInnerHTML,
     getOptionModalInnerHTML,
@@ -7,8 +9,9 @@ import {
     getChecklistModalBody,
     getExpirationModalBody,
     getMoveCardModalBody,
-    getCopyCardModalBody
-} from "../get-html";
+    getCopyCardModalBody,
+    createCardInDOM, createListInDOM,
+} from "../html";
 
 
 function _createCardModal(options) {
@@ -22,46 +25,12 @@ function _createCardModal(options) {
 }
 
 
-function changeCardTitleInDB(oldTitle, newTitle, listID, cardID) {
-    const body = {
-        title: newTitle
-    }
-    const csrfToken = document.cookie.match(/csrftoken=([\w-]+)/)[1]
-    const headers = {
-        'X-CSRFToken':  csrfToken,
-        'Content-Type': 'application/json; charset=UTF-8'
-    }
-    const URL = `http://127.0.0.1:8000/api/boards/1/lists/${ listID }/cards/${ cardID }/`
-    sendRequest('PATCH', URL, body, headers)
-        .then(data => console.log(data))
-        .catch(err => console.log(err))
-
-    changeCardTitleInList(listID, oldTitle, newTitle)
-}
-
-
 function changeCardTitleInList(listId, oldTitle, newTitle) {
     const list = document.getElementById('list' + listId)
     const cards = list.querySelectorAll('.card')
     cards.forEach(card => {
         if (card.innerText === oldTitle) card.innerText = newTitle
     })
-}
-
-
-async function changeCardDescInDB(oldDesc, newDesc, listID, cardID) {
-    const body = {
-        description: newDesc
-    }
-    const csrfToken = document.cookie.match(/csrftoken=([\w-]+)/)[1]
-    const headers = {
-        'X-CSRFToken':  csrfToken,
-        'Content-Type': 'application/json; charset=UTF-8'
-    }
-    const URL = `http://127.0.0.1:8000/api/boards/1/lists/${ listID }/cards/${ cardID }/`
-    await sendRequest('PATCH', URL, body, headers)
-        .then(data => console.log(data))
-        .catch(err => console.log(err))
 }
 
 
@@ -172,15 +141,32 @@ const getListSettingsModalMethods = ($modalNode, listID) => {
                 addCardBtn.click()
             })
             const copyListBtn = $modalNode.querySelector('.settings-modal-copy-list-btn')
-            copyListBtn.addEventListener('click', e => {
-                // create new list with event listeners
-
+            copyListBtn.addEventListener('click', async e => {
+                const title =  document.getElementById('list'+ listID).querySelector('.list__title').value
+                // create list in DB: +
+                const createdList = await createListInDB(title)
+                // create list in DOM
+                const createdListNode = createListInDOM(createdList)
+                // create list cards in DB: +/-
+                const getCardsURL = `http://127.0.0.1:8000/api/boards/1/lists/${listID}/cards/`
+                const cards = await sendRequest('GET', getCardsURL)
+                for (let i = 0; i < cards.length; ++i) {
+                    const body = cards[i]
+                    delete body.id
+                    delete body.marks // to fix: create marks
+                    delete body.checklists // to fix: create checklists
+                    body.list = createdList.id
+                    const createdCard = await createCardInDB(body)
+                    const cardNode = createCardInDOM(createdCard)
+                    const listBody = createdListNode.querySelector('.list__body')
+                    listBody.appendChild(cardNode)
+                }
                 // add to board
                 const board = document.querySelector('.board')
                 const addListBlock = board.querySelector('.add-list-block')
-                // board.insertBefore(newList, addListBlock)
+                board.insertBefore(createdListNode, addListBlock)
                 board.scrollLeft = board.scrollWidth
-            })
+           })
             const delAllCardsBtn = $modalNode.querySelector('.settings-modal-delete-all-cards-btn')
             delAllCardsBtn.addEventListener('click', e => {
 
@@ -241,7 +227,8 @@ export const modal = function(options, afterNode = null) {
             modal.setChecklistsEventListeners()
         const modalTitle = $modalNode.querySelector('.modal-title')
         modalTitle.addEventListener('blur', e => {
-            changeCardTitleInDB(options.title, modalTitle.value, options.list, options.id)
+            changeCardTitleInDB(options.list, options.id)
+            changeCardTitleInList(options.list, options.title, modalTitle.value)
         })
         const deleteBtn = $modalNode.querySelector('.modal-delete-btn')
         deleteBtn.addEventListener('click', e => modal.delete(options.card.list, options.card.id))

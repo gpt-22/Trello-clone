@@ -1,3 +1,13 @@
+import {cardOnDragEnd, cardOnDragStart, onOverList} from "./drag-n-drop";
+import {getIDNum, isValidTitle} from "./helpers";
+import {createCardInDB, createListInDB} from "./db-requests";
+
+export function HTMLToNode(HTML) {
+    const div = document.createElement('div');
+    div.innerHTML = HTML.trim();
+    return div.firstChild;
+}
+
 
 export const cardToHTML = card => `
 <div class="list__item card" draggable="true" id="card${ card.id }">
@@ -133,3 +143,88 @@ export function getExpirationModalBody(options) {}
 export function getMoveCardModalBody(options) {}
 export function getCopyCardModalBody(options) {}
 
+
+export function addCardEvents(card) {
+    card.addEventListener('dragstart', cardOnDragStart)
+    card.addEventListener('dragend', cardOnDragEnd)
+}
+
+
+export function createCardInDOM(createdCard) {
+    const newCard = document.createElement('div')
+    newCard.id = 'card' + createdCard.id
+    newCard.className += 'list__item card'
+    newCard.setAttribute('draggable', 'true')
+    newCard.innerText = createdCard.title
+    addCardEvents(newCard)
+
+    return newCard
+}
+
+
+export async function createCard(e, title, listBody, textArea) {
+    const listID = getIDNum(e.target.parentNode.parentNode.id)
+    const body = {
+        list: listID,
+        title: title
+    }
+    const createdCard = await createCardInDB(body)
+    const newCard = createCardInDOM(createdCard)
+    listBody.insertBefore(newCard, textArea)
+}
+
+
+export function addListEvents(list, lists) {
+    list.addEventListener('dragover', onOverList)
+    list.addEventListener('dragstart', () => {
+        lists.forEach(list => list.removeEventListener('dragover', onOverList))
+        list.classList.add('dragging-list')
+    })
+    list.addEventListener('dragend', () => {
+        list.classList.remove('dragging-list')
+        lists.forEach(list => list.addEventListener('dragover', onOverList))
+    })
+}
+
+
+export function createListInDOM(createdList) {
+    const newList = HTMLToNode(listToHTML(createdList))
+    const lists = document.querySelectorAll('.list')
+    addListEvents(newList, lists)
+    newList.querySelector('.add-card-btn').addEventListener('click', addTextArea)
+
+    return newList
+}
+
+
+export async function createList(title) {
+    const createdList = await createListInDB(title)
+    return createListInDOM(createdList)
+}
+
+
+export function addTextArea() {
+    const listBody = this.parentElement.parentElement.querySelector('.list__body')
+    const textArea = document.createElement('textarea')
+    textArea.classList.add('add-card-text')
+    textArea.placeholder = 'Введите заголовок для этой карточки'
+    textArea.rows = 3
+    textArea.addEventListener('keyup', e => (e.keyCode === 13) ? textArea.blur() : {})
+    textArea.addEventListener('blur', addCardOrHideTextArea)
+    listBody.appendChild(textArea)
+    textArea.focus()
+    listBody.scrollTop = listBody.scrollHeight
+}
+
+
+function addCardOrHideTextArea(e) {
+    const listBody = this.parentNode
+    const title = this.value
+    if (isValidTitle(title)) {
+        createCard(e, title, listBody, this).then( () => {
+            this.value = ''
+            this.focus()
+        })
+    } else listBody.removeChild(this)
+    listBody.scrollTop = listBody.scrollHeight
+}

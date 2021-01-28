@@ -245,14 +245,14 @@
 }
 .settings-modal .modal-container {
   background-color: #fff;
-  width: 280px;
+  width: 240px;
   border: 1px solid rgb(236, 236, 236);
   border-radius: 3px;
 }
 .settings-modal .modal-header {}
 .settings-modal .modal-title {
   margin: 0;
-  padding: 9px 8px 9px 70px;
+  padding: 9px 8px 9px 52px;
   font-weight: normal;
   font-size: 14px;
 }
