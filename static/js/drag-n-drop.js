@@ -1,5 +1,7 @@
-// Drag & Drop for cards
+import {getIDNum} from "./helpers";
 
+
+// Drag & Drop for cards
 export function getBeforeCard(container, y) {
     const notDraggingElements = [...container.querySelectorAll('.card:not(.dragging)')]
 
@@ -36,6 +38,9 @@ export function cardOnDragEnd(e) {
     const board = document.querySelector('.board')
     board.addEventListener('dragover', onOverBoard)
     this.classList.remove('dragging')
+
+    const cardID = getIDNum(e.target.id)
+
 }
 
 

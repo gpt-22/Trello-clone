@@ -1,6 +1,5 @@
 import {cardOnDragEnd, cardOnDragStart, onOverList} from "./drag-n-drop";
-import {getIDNum, isValidTitle} from "./helpers";
-import {createCardInDB, createListInDB} from "./db-requests";
+import {sendRequest, getIDNum, isValidTitle} from "./helpers";
 
 
 export function HTMLToNode(HTML) {
@@ -179,7 +178,8 @@ export async function createCard(e, title, listBody, textArea) {
         list: listID,
         title: title
     }
-    const createdCard = await createCardInDB(body)
+    const url = `http://127.0.0.1:8000/api/boards/1/lists/${ listID }/cards/`
+    const createdCard = await sendRequest('POST', url, body)
     const newCard = createCardInDOM(createdCard)
     listBody.insertBefore(newCard, textArea)
 }
@@ -209,7 +209,12 @@ export function createListInDOM(createdList) {
 
 
 export async function createList(title) {
-    const createdList = await createListInDB(title)
+    const body = {
+        board: 1,
+        title: title
+    }
+    const url = `http://127.0.0.1:8000/api/boards/1/lists/`
+    const createdList = await sendRequest('POST', url, body)
     return createListInDOM(createdList)
 }
 

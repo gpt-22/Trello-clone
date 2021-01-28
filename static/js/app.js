@@ -1,6 +1,5 @@
 import {onOverBoard} from "./drag-n-drop";
-import {sendRequest} from "./db-requests";
-import {isValidTitle, getIDNum} from './helpers'
+import {sendRequest, isValidTitle, getIDNum} from './helpers'
 import {
     listToHTML,
     addListEvents,
@@ -156,7 +155,7 @@ main()
 *---------------
 * drag&drop card +
 * drag&drop list +
-* save dropped card in list (update db)
+* save dropped card in list (update db): delete from one list + add copy to another
 * save dropped list in position (update db)
 * --------------
 * render lists and cards +
@@ -172,8 +171,8 @@ main()
 * list settings modal +
 * add card +
 * copy list +- (fix marks & checklists copying)
-* delete all list cards
-* delete list
+* delete all list cards +
+* delete list +
 *---------------
 * marks modal
 * add/remove mark

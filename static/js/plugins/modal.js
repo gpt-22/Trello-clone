@@ -1,7 +1,4 @@
 import {
-    sendRequest, changeCardTitleInDB, changeCardDescInDB, createListInDB, createCardInDB, deleteFromDB
-} from "../db-requests";
-import {
     getCardModalInnerHTML,
     getOptionModalInnerHTML,
     getListSettingsModalBody,
@@ -14,26 +11,18 @@ import {
     createListInDOM,
     deleteFromDOMbyID,
 } from "../html";
-import {getIDNum} from "../helpers";
+import {sendRequest, getIDNum} from "../helpers";
 
 
 function _createCardModal(options) {
     const modalNode = document.createElement('div')
     modalNode.classList.add('modal')
     modalNode.classList.add('card-modal')
+    modalNode.id = 'cardModal' + options.card.id
     modalNode.insertAdjacentHTML('afterbegin', getCardModalInnerHTML(options.card))
     document.body.appendChild(modalNode)
 
     return modalNode
-}
-
-
-function changeCardTitleInList(listId, oldTitle, newTitle) {
-    const list = document.getElementById('list' + listId)
-    const cards = list.querySelectorAll('.card')
-    cards.forEach(card => {
-        if (card.innerText === oldTitle) card.innerText = newTitle
-    })
 }
 
 
@@ -52,7 +41,13 @@ const getCardModalMethods = $modalNode => {
             const modalDescBtns = $modalNode.querySelector('.modal-desc-btns')
             modalDesc.addEventListener('focus', e => modalDescBtns.style.display = 'flex')
             modalDesc.addEventListener('blur', e => {
-                changeCardDescInDB(options.card.description, modalDesc.value, options.card.list, options.card.id)
+                const cardID = options.card.id
+                const listID = options.card.list
+                const body = {
+                    description: modalDesc.value
+                }
+                const url = `http://127.0.0.1:8000/api/boards/1/lists/${ listID }/cards/${ cardID }/`
+                sendRequest('PATCH', url, body).catch(err => console.log(err))
                 modalDescBtns.style.display = 'none'
                 modalDesc.value === '' ? modalDesc.style.minHeight = '56px' : ''
             })
@@ -98,7 +93,7 @@ const getCardModalMethods = $modalNode => {
         setChecklistItemsEventListeners() {},
         delete(listID, cardID) {
             const url = `http://127.0.0.1:8000/api/boards/1/lists/${ listID }/cards/${ cardID }/`
-            deleteFromDB(url)
+            sendRequest('DELETE', url, null).catch(err => console.log(err))
             this.close()
             deleteFromDOMbyID('card'+cardID)
         }
@@ -131,7 +126,12 @@ const getListSettingsModalMethods = ($modalNode, listID) => {
             copyListBtn.addEventListener('click', async e => {
                 const title =  document.getElementById('list'+ listID).querySelector('.list__title').value
                 // create list in DB: +
-                const createdList = await createListInDB(title)
+                const body = {
+                    board: 1,
+                    title: title
+                }
+                const url = `http://127.0.0.1:8000/api/boards/1/lists/`
+                const createdList = await  sendRequest('POST', url, body)
                 // create list in DOM
                 const createdListNode = createListInDOM(createdList)
                 // create list cards in DB: +/-
@@ -143,7 +143,8 @@ const getListSettingsModalMethods = ($modalNode, listID) => {
                     delete body.marks // to fix: create marks
                     delete body.checklists // to fix: create checklists
                     body.list = createdList.id
-                    const createdCard = await createCardInDB(body)
+                    const url = `http://127.0.0.1:8000/api/boards/1/lists/${ body.list }/cards/`
+                    const createdCard = await sendRequest('POST', url, body)
                     const cardNode = createCardInDOM(createdCard)
                     const listBody = createdListNode.querySelector('.list__body')
                     listBody.appendChild(cardNode)
@@ -163,7 +164,7 @@ const getListSettingsModalMethods = ($modalNode, listID) => {
                 ids.forEach(idStr => {
                     const cardID = getIDNum(idStr)
                     const url = `http://127.0.0.1:8000/api/boards/1/lists/${ listID }/cards/${ cardID }/`
-                    deleteFromDB(url)
+                    sendRequest('DELETE', url, null).catch(err => console.log(err))
                     deleteFromDOMbyID('card' + cardID)
                 })
                 this.close()
@@ -171,7 +172,7 @@ const getListSettingsModalMethods = ($modalNode, listID) => {
             const delListBtn = $modalNode.querySelector('.settings-modal-delete-list-btn')
             delListBtn.addEventListener('click', e => {
                 const url = `http://127.0.0.1:8000/api/boards/1/lists/${ listID }/`
-                deleteFromDB(url)
+                sendRequest('DELETE', url, null).catch(err => console.log(err))
                 deleteFromDOMbyID('list' + listID)
             })
         }
@@ -222,12 +223,24 @@ export const modal = function(options, afterNode = null) {
         $modalNode = _createCardModal(options)
         Object.assign(modal, getCardModalMethods($modalNode))
         modal.setModalDescriptionEventListeners(options)
-        if ('checklists' in options)
+        if ('checklists' in options.card)
             modal.setChecklistsEventListeners()
         const modalTitle = $modalNode.querySelector('.modal-title')
         modalTitle.addEventListener('blur', e => {
-            changeCardTitleInDB(options.list, options.id)
-            changeCardTitleInList(options.list, options.title, modalTitle.value)
+            // change title in DB
+            const body = {
+                title: modalTitle.value
+            }
+            const cardID = options.card.id
+            const listID = options.card.list
+            const url = `http://127.0.0.1:8000/api/boards/1/lists/${listID}/cards/${cardID}/`
+            console.log(url)
+            sendRequest('PATCH', URL, body)
+                .then(data => console.log(data))
+                .catch(err => console.log(err))
+            // change title in list
+            const cardNode = document.getElementById('card'+cardID)
+            cardNode.innerText = modalTitle.value
         })
         const deleteBtn = $modalNode.querySelector('.modal-delete-btn')
         deleteBtn.addEventListener('click', e => modal.delete(options.card.list, options.card.id))
