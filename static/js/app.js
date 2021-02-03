@@ -1,13 +1,7 @@
 import {onOverBoard} from "./drag-n-drop";
 import {sendRequest, isValidTitle, getIDNum} from './helpers'
-import {
-    listToHTML,
-    addListEvents,
-    addCardEvents,
-    addTextArea,
-    createList
-} from "./html"
-import {modal} from './plugins/modal'
+import {listToHTML, addListEvents, addCardEvents, addTextArea, createList} from "./html"
+import {createModal} from './plugins/modal'
 
 
 // Vars
@@ -22,24 +16,22 @@ async function showCardModal(e) {
     const list = response.lists.filter( list => list.id === listID )[0]
     const card = list.cards.filter( card => card.title === e.target.innerText.trim())[0]
     const options = {
-        card: card,
-        overlay: true,
-        animateOpenClose: true
+        type: 'card',
+        card: card
     }
-    const cardModal = modal(options) // DOM operations are async
-    setTimeout( () => cardModal.open(), 0) // to see animation
+    createModal(options)
 }
 
 
 function showSettingsModal(e, settingsContainer) {
     const listNode = e.target.parentNode.parentNode.parentNode
     const listID = getIDNum(listNode.id)
-    const modalSettings = {
-        type: "listSettings",
-        listID: listID
+    const options = {
+        type: 'listSettings',
+        listID: listID,
+        container: settingsContainer
     }
-    const settingsModal = modal(modalSettings, settingsContainer)
-    setTimeout( () => settingsModal.open(), 0)
+    createModal(options)
 }
 
 
@@ -125,8 +117,8 @@ async function renderLists() {
 const main = async () => {
     await renderLists()
 
-    // Optimized way to listen click on card instead of adding many eventListeners
     document.addEventListener('click', e => {
+        // Optimized way to listen click on card instead of adding many eventListeners
         if (e.target.classList.contains('card')) {
             showCardModal(e)
         } else if (e.target.classList.contains('list__options')) {

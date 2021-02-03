@@ -147,7 +147,16 @@ export const getListSettingsModalBody = () => `
 `
 
 
-export function getMarksModalBody(options) {}
+export const getMarksModalBody = () => `
+    <div class="mark-color green"></div>
+    <div class="mark-color yellow"></div>
+    <div class="mark-color orange"></div>
+    <div class="mark-color red"></div> 
+    <div class="mark-color purple"></div>
+    <div class="mark-color blue"></div> 
+`
+
+
 export function getChecklistModalBody(options) {}
 export function getExpirationModalBody(options) {}
 export function getMoveCardModalBody(options) {}

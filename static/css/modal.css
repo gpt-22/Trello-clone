@@ -287,8 +287,17 @@
   background-color: rgb(235, 233, 233);
 }
 
-/* TODO:
-* card modal styles
-* settings modal styles
 
+.mark-modal {}
+
+
+
+/* TODO:
+* card modal styles +
+* settings modal styles +
+* marks modal styles
+* checklists modal styles
+* expiration modal styles
+* move modal styles
+* copy modal styles
 */
