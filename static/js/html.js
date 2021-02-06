@@ -85,7 +85,7 @@ export const checkListToHTML = checkList => `
 `
 
 
-export const getCardModalInnerHTML = (cardObj) => `
+export const getCardModalInnerHTML = cardObj => `
     <div class="modal-overlay" data-close="true">
         <div class="modal-container">
             <div class="modal-header">
@@ -109,15 +109,27 @@ export const getCardModalInnerHTML = (cardObj) => `
                 <div class="modal-col modal-col-right">
                     <div class="modal-add-block">
                         <span class="modal-add-title">Добавить на карточку</span>
-                        <button type="button" class="modal-btn default modal-mark-btn">Метку</button>
-                        <button type="button" class="modal-btn default modal-checklist-btn">Чек-лист</button>
-                        <button type="button" class="modal-btn default modal-datetime-btn">Срок</button>    
+                        <div class="marks-container">
+                           <button type="button" class="modal-btn default modal-mark-btn">Метку</button>
+                        </div>
+                        <div class="checklist-container">
+                            <button type="button" class="modal-btn default modal-checklist-btn">Чек-лист</button>                       
+                        </div>
+                        <div class="datetime-container">
+                            <button type="button" class="modal-btn default modal-datetime-btn">Срок</button>    
+                        </div>
                     </div>
                     <div class="modal-actions-block">
                         <span class="modal-actions-title">Действия</span>
-                        <button type="button" class="modal-btn default modal-move-btn">Переместить</button>
-                        <button type="button" class="modal-btn default modal-copy-btn">Копировать</button>
-                        <button type="button" class="modal-btn danger modal-delete-btn">Удалить</button>    
+                        <div class="copy-container">
+                            <button type="button" class="modal-btn default modal-move-btn">Переместить</button>
+                        </div>    
+                        <div class="move-container">
+                            <button type="button" class="modal-btn default modal-copy-btn">Копировать</button>                
+                        </div>    
+                        <div class="delete-container">
+                            <button type="button" class="modal-btn danger modal-delete-btn">Удалить</button>                        
+                        </div>    
                     </div>
                 </div>
             </div>
@@ -126,17 +138,37 @@ export const getCardModalInnerHTML = (cardObj) => `
 `
 
 
-export const getOptionModalInnerHTML = (body) => `
+export const getOptionModalInnerHTML = type => `
     <div class="modal-container">
         <div class="modal-header">
             <h3 class="modal-title" >Действия со списком</h3>
             <span class="modal-close" data-close="true">&#10006;</span>                
         </div>
         <div class="modal-body">
-            ${ body }            
+            ${ getOptionModalBodyByType(type) }            
         </div>
     </div>
 `
+
+
+const getOptionModalBodyByType = type => {
+    switch (type) {
+        case 'listSettings':
+            return getListSettingsModalBody()
+        case 'marks':
+            return getMarksModalBody()
+        case 'checklist':
+            return getChecklistModalBody()
+        case 'expiration':
+            return getExpirationModalBody()
+        case 'moveCard':
+            return getMoveCardModalBody()
+        case 'copyCard':
+            return getCopyCardModalBody()
+        case 'deleteCard':
+            return getDeleteCardModalBody()
+    }
+}
 
 
 export const getListSettingsModalBody = () => `
@@ -157,10 +189,11 @@ export const getMarksModalBody = () => `
 `
 
 
-export function getChecklistModalBody(options) {}
-export function getExpirationModalBody(options) {}
-export function getMoveCardModalBody(options) {}
-export function getCopyCardModalBody(options) {}
+export function getChecklistModalBody() {}
+export function getExpirationModalBody() {}
+export function getMoveCardModalBody() {}
+export function getCopyCardModalBody() {}
+export function getDeleteCardModalBody() {}
 
 
 export function addCardEvents(card) {
@@ -187,7 +220,7 @@ export async function createCard(e, title, listBody, textArea) {
         list: listID,
         title: title
     }
-    const url = `http://127.0.0.1:8000/api/boards/1/lists/${ listID }/cards/`
+    const url = `boards/1/lists/${ listID }/cards/`
     const createdCard = await sendRequest('POST', url, body)
     const newCard = createCardInDOM(createdCard)
     listBody.insertBefore(newCard, textArea)
@@ -222,7 +255,7 @@ export async function createList(title) {
         board: 1,
         title: title
     }
-    const url = `http://127.0.0.1:8000/api/boards/1/lists/`
+    const url = `boards/1/lists/`
     const createdList = await sendRequest('POST', url, body)
     return createListInDOM(createdList)
 }

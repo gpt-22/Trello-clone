@@ -4,15 +4,11 @@ import {listToHTML, addListEvents, addCardEvents, addTextArea, createList} from 
 import {createModal} from './plugins/modal'
 
 
-// Vars
-const getBoardURL = 'http://127.0.0.1:8000/api/boards/1'  // just takes the first board
-
-
 // Modals
 async function showCardModal(e) {
     const listNode = e.target.parentNode.parentNode
     const listID = getIDNum(listNode.id)
-    const response = await sendRequest('GET', getBoardURL)
+    const response = await sendRequest('GET', 'boards/1/')
     const list = response.lists.filter( list => list.id === listID )[0]
     const card = list.cards.filter( card => card.title === e.target.innerText.trim())[0]
     const options = {
@@ -95,7 +91,7 @@ function addListBlockEventListeners(board) {
 
 async function renderLists() {
     // Getting HTML
-    const response = await sendRequest('GET', getBoardURL)
+    const response = await sendRequest('GET', 'boards/1/')
     const HTML = response.lists.map(listToHTML).join('')
     const app = document.getElementById('app')
     app.insertAdjacentHTML('afterbegin', HTML)
@@ -126,7 +122,7 @@ const main = async () => {
             if (settingsContainer.children.length === 1)
                 showSettingsModal(e, settingsContainer)
             else {
-                const modalNode = e.target.parentNode.querySelector('.settings-modal')
+                const modalNode = e.target.parentNode.querySelector('.list-settings-modal')
                 // remove all event listeners
                 const modalClone = modalNode.cloneNode(true)
                 modalNode.parentNode.replaceChild(modalClone, modalNode)

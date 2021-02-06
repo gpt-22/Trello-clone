@@ -1,12 +1,6 @@
 import {
     getCardModalInnerHTML,
     getOptionModalInnerHTML,
-    getListSettingsModalBody,
-    getMarksModalBody,
-    getChecklistModalBody,
-    getExpirationModalBody,
-    getMoveCardModalBody,
-    getCopyCardModalBody,
     createCardInDOM,
     createListInDOM,
     deleteFromDOMbyID,
@@ -14,12 +8,111 @@ import {
 import {sendRequest, getIDNum} from "../helpers";
 
 
-function _createModalNode(modalInnerHTMl, container, typeCSSClass) {
+function _createModalNode(options, modalObj) {
     const modalNode = document.createElement('div')
     modalNode.classList.add('modal')
-    modalNode.classList.add(typeCSSClass)
-    modalNode.insertAdjacentHTML('afterbegin', modalInnerHTMl)
-    container.appendChild(modalNode)
+
+    if (options.type !== 'card')
+        modalNode.insertAdjacentHTML('afterbegin', getOptionModalInnerHTML(options.type))
+
+    switch (options.type) {
+        case 'card':
+            modalNode.id = 'cardModal' + options.card.id
+            modalNode.classList.add('card-modal')
+            modalNode.insertAdjacentHTML('afterbegin', getCardModalInnerHTML(options.card))
+            document.body.appendChild(modalNode)
+            // Events
+            Object.assign(modalObj, getCardModalMethods(modalNode))
+            modalObj.setModalDescriptionEventListeners(options)
+            if ('checklists' in options.card)
+                modalObj.setChecklistsEventListeners()
+            const modalTitle = modalNode.querySelector('.modal-title')
+            modalTitle.addEventListener('blur', e => {
+                const body = {
+                    title: modalTitle.value
+                }
+                const listID = options.card.list
+                const cardID = options.card.id
+                const url = `boards/1/lists/${listID}/cards/${cardID}/`
+                sendRequest('PATCH', url, body).catch(err => console.log(err))
+                const cardNode = document.getElementById('card'+cardID)
+                cardNode.innerText = modalTitle.value
+            })
+            const markBtn = modalNode.querySelector('.modal-mark-btn')
+            markBtn.addEventListener('click', e => {
+                createModal({
+                    type: 'marks',
+                    container: e.target.parentNode
+                })
+            })
+            const checklistBtn = modalNode.querySelector('.modal-checklist-btn')
+            checklistBtn.addEventListener('click', e => {
+                createModal({
+                    type: 'checklist',
+                    container: e.target.parentNode
+                })
+            })
+            const expirationBtn = modalNode.querySelector('.modal-datetime-btn')
+            expirationBtn.addEventListener('click', e => {
+                createModal({
+                    type: 'expiration',
+                    container: e.target.parentNode
+                })
+            })
+            const moveBtn = modalNode.querySelector('.modal-move-btn')
+            moveBtn.addEventListener('click', e => {
+                createModal({
+                    type: 'moveCard',
+                    container: e.target.parentNode
+                })
+            })
+            const copyBtn = modalNode.querySelector('.modal-copy-btn')
+            copyBtn.addEventListener('click', e => {
+                createModal({
+                    type: 'copyCard',
+                    container: e.target.parentNode
+                })
+            })
+            const deleteBtn = modalNode.querySelector('.modal-delete-btn')
+            deleteBtn.addEventListener('click', e => {
+                modalObj.delete(options.card.list, options.card.id)
+            })
+            break
+        case 'listSettings':
+            modalNode.classList.add('list-settings-modal')
+            options.container.appendChild(modalNode)
+            Object.assign(modalObj, getListSettingsModalMethods(modalNode, options.listID))
+            modalObj.setEventListeners(modalNode)
+            break
+        case 'marks':
+            modalNode.classList.add('marks-modal')
+            document.querySelector('.marks-container').appendChild(modalNode)
+            break
+        case 'checklist':
+            modalNode.classList.add('checklist-modal')
+            document.querySelector('.checklist-container').appendChild(modalNode)
+            break
+        case 'expiration':
+            modalNode.classList.add('expiration-modal')
+            document.querySelector('.datetime-container').appendChild(modalNode)
+            break
+        case 'moveCard':
+            modalNode.classList.add('move-card-modal')
+            container.appendChild(modalNode)
+            break
+        case 'copyCard':
+            modalNode.classList.add('copy-card-modal')
+            container.appendChild(modalNode)
+            break
+        case 'deleteCard':
+            modalNode.classList.add('delete-card-modal')
+            container.appendChild(modalNode)
+            console.log('delete card')
+            break
+        default:
+            console.log('invalid type of modal')
+    }
+
     return modalNode
 }
 
@@ -44,7 +137,7 @@ const getCardModalMethods = modalNode => {
                 const body = {
                     description: modalDesc.value
                 }
-                const url = `http://127.0.0.1:8000/api/boards/1/lists/${ listID }/cards/${ cardID }/`
+                const url = `boards/1/lists/${ listID }/cards/${ cardID }/`
                 sendRequest('PATCH', url, body).catch(err => console.log(err))
                 modalDescBtns.style.display = 'none'
                 modalDesc.value === '' ? modalDesc.style.minHeight = '56px' : ''
@@ -90,15 +183,13 @@ const getCardModalMethods = modalNode => {
         },
         setChecklistItemsEventListeners() {},
         delete(listID, cardID) {
-            const url = `http://127.0.0.1:8000/api/boards/1/lists/${ listID }/cards/${ cardID }/`
+            const url = `boards/1/lists/${ listID }/cards/${ cardID }/`
             sendRequest('DELETE', url, null).catch(err => console.log(err))
             this.close()
             deleteFromDOMbyID('card'+cardID)
         }
     }
 }
-
-
 
 
 const getListSettingsModalMethods = (modalNode, listID) => {
@@ -119,12 +210,12 @@ const getListSettingsModalMethods = (modalNode, listID) => {
                     board: 1,
                     title: title
                 }
-                const url = `http://127.0.0.1:8000/api/boards/1/lists/`
+                const url = `boards/1/lists/`
                 const createdList = await  sendRequest('POST', url, body)
                 // create list in DOM
                 const createdListNode = createListInDOM(createdList)
                 // create list cards in DB: +/-
-                const getCardsURL = `http://127.0.0.1:8000/api/boards/1/lists/${listID}/cards/`
+                const getCardsURL = `boards/1/lists/${listID}/cards/`
                 const cards = await sendRequest('GET', getCardsURL)
                 for (let i = 0; i < cards.length; ++i) {
                     const body = cards[i]
@@ -132,7 +223,7 @@ const getListSettingsModalMethods = (modalNode, listID) => {
                     delete body.marks // to fix: create marks
                     delete body.checklists // to fix: create checklists
                     body.list = createdList.id
-                    const url = `http://127.0.0.1:8000/api/boards/1/lists/${ body.list }/cards/`
+                    const url = `boards/1/lists/${ body.list }/cards/`
                     const createdCard = await sendRequest('POST', url, body)
                     const cardNode = createCardInDOM(createdCard)
                     const listBody = createdListNode.querySelector('.list__body')
@@ -152,7 +243,7 @@ const getListSettingsModalMethods = (modalNode, listID) => {
                 const ids = Array.from(cardNodes).map(card => card.id)
                 ids.forEach(idStr => {
                     const cardID = getIDNum(idStr)
-                    const url = `http://127.0.0.1:8000/api/boards/1/lists/${ listID }/cards/${ cardID }/`
+                    const url = `boards/1/lists/${ listID }/cards/${ cardID }/`
                     sendRequest('DELETE', url, null).catch(err => console.log(err))
                     deleteFromDOMbyID('card' + cardID)
                 })
@@ -160,7 +251,7 @@ const getListSettingsModalMethods = (modalNode, listID) => {
             })
             const delListBtn = modalNode.querySelector('.settings-modal-delete-list-btn')
             delListBtn.addEventListener('click', e => {
-                const url = `http://127.0.0.1:8000/api/boards/1/lists/${ listID }/`
+                const url = `boards/1/lists/${ listID }/`
                 sendRequest('DELETE', url, null).catch(err => console.log(err))
                 deleteFromDOMbyID('list' + listID)
             })
@@ -178,11 +269,10 @@ export const createModal = function(options) {
     // 'expiration'
     // 'moveCard'
     // 'copyCard'
+    // 'deleteCard'
 
     let isDestroyed = false
-    let modalNode
-
-    const modal = {
+    const modalObj = {
         open() {
             if (isDestroyed) return
             modalNode.classList.add('open')
@@ -198,71 +288,15 @@ export const createModal = function(options) {
             isDestroyed = true
         },
     }
+    const modalNode = _createModalNode(options, modalObj)
 
-    if (options.type === 'card') {
-        modalNode = _createModalNode(getCardModalInnerHTML(options.card), document.body, 'card-modal')
-        modalNode.id = 'cardModal' + options.card.id
-        Object.assign(modal, getCardModalMethods(modalNode))
-        modal.setModalDescriptionEventListeners(options)
-        if ('checklists' in options.card)
-            modal.setChecklistsEventListeners()
-        const modalTitle = modalNode.querySelector('.modal-title')
-        modalTitle.addEventListener('blur', e => {
-            // change title in DB
-            const body = {
-                title: modalTitle.value
-            }
-            const cardID = options.card.id
-            const listID = options.card.list
-            const url = `http://127.0.0.1:8000/api/boards/1/lists/${listID}/cards/${cardID}/`
-            console.log(url)
-            sendRequest('PATCH', URL, body)
-                .then(data => console.log(data))
-                .catch(err => console.log(err))
-            // change title in list
-            const cardNode = document.getElementById('card'+cardID)
-            cardNode.innerText = modalTitle.value
-        })
+    modalNode.addEventListener('click', e => {
+        (e.target.dataset.close === 'true') ? modalObj.close() : ''
+    })
+    // as DOM operation are async we need to use setTimeout to see animation open
+    setTimeout( () => modalObj.open(), 0)
 
-        const markBtn = modalNode.querySelector('.modal-mark-btn')
-        markBtn.addEventListener('click', e => {
-
-        })
-
-        const checklistBtn = modalNode.querySelector('.modal-checklist-btn')
-        const expirationBtn = modalNode.querySelector('.modal-datetime-btn')
-        const moveBtn = modalNode.querySelector('.modal-move-btn')
-        const copyBtn = modalNode.querySelector('.modal-copy-btn')
-        const deleteBtn = modalNode.querySelector('.modal-delete-btn')
-        deleteBtn.addEventListener('click', e => modal.delete(options.card.list, options.card.id))
-    } else if (options.type === 'listSettings') {
-        const body = getListSettingsModalBody(options)
-        modalNode = _createModalNode(getOptionModalInnerHTML(body), options.container, 'settings-modal')
-        Object.assign(modal, getListSettingsModalMethods(modalNode, options.listID))
-        modal.setEventListeners(modalNode)
-    } else if (options.type === 'marks') {
-        const body = getMarksModalBody(options)
-        modalNode = _createModalNode(getOptionModalInnerHTML(body), options.container, 'settings-modal')
-    } else if (options.type === 'checklist') {
-        const body = getChecklistModalBody(options)
-        modalNode = _createModalNode(getOptionModalInnerHTML(body), options.container, 'settings-modal')
-    } else if (options.type === 'expiration') {
-        const body = getExpirationModalBody(options)
-        modalNode = _createModalNode(getOptionModalInnerHTML(body), options.container, 'settings-modal')
-    } else if (options.type === 'moveCard') {
-        const body = getMoveCardModalBody(options)
-        modalNode = _createModalNode(getOptionModalInnerHTML(body), options.container, 'settings-modal')
-    } else if (options.type === 'copyCard') {
-        const body = getCopyCardModalBody(options)
-        modalNode = _createModalNode(getOptionModalInnerHTML(body), options.container, 'settings-modal')
-    }
-
-
-    modalNode.addEventListener('click', e => (e.target.dataset.close === 'true') ? modal.close() : '')
-
-    setTimeout( () => modal.open(), 0) // to see animation
-
-    return modal
+    return modalObj
 }
 
 
@@ -275,3 +309,23 @@ export const createModal = function(options) {
 
 // create modal node & insert modal in DOM
 // add modal event listeners
+
+/*TODO
+* marks modal styles
+* fix marks modal closing
+* add mark on modal, on card, in db
+* remove mark from modal, from card, from db
+* checklist modal
+* checklist progress bar
+* add checklist
+* remove checklist
+* expiration modal
+* add expiration
+* remove expiration
+* move card modal
+* move card
+* copy card modal
+* copy card
+* mark card as done
+* */
+

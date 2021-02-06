@@ -27,7 +27,7 @@
 .modal.open .modal-overlay,
 .modal.open .modal-container {
     opacity: 1;
-    z-index: 1000;
+    z-index: 10;
 }
 .modal.open .modal-overlay {
     background-color: rgba(0, 0, 0, .5);
@@ -38,7 +38,7 @@
 .modal.hiding .modal-overlay,
 .modal.hiding .modal-container {
     opacity: 1;
-    z-index: 1000;
+    z-index: 10;
 }
 
 .modal-btn {
@@ -59,10 +59,8 @@
 }
 
 
-
-/* Card modal */
-
-.card-modal .modal-container {
+/* Card modal (must be fixed) */
+.card-modal > div > .modal-container {
   width: 600px;
   margin: 50px 0 80px;
   padding: 10px;
@@ -70,10 +68,10 @@
   transform: translateY(-600px);
   transition: transform .5s;
 }
-.card-modal .modal-header {
+.card-modal > div > div > .modal-header {
   padding-bottom: 10px;
 }
-.card-modal .modal-title {
+.card-modal > div > div > div > .modal-title {
   width: 100%;
   margin-right: 5px;
   font-size: 1.25rem;
@@ -93,7 +91,7 @@
   background-color: rgb(235, 233, 233);
 }
 
-.card-modal .modal-body {
+.card-modal > div > div > .modal-body {
   display: grid;
   grid-template-columns: 3fr 1fr;
   padding: 20px 10px;
@@ -238,25 +236,25 @@
 .modal-delete-btn {}
 
 /* Settings modal */
-.settings-modal {
+.list-settings-modal {
   position: absolute;
   left: 1.5px;
   bottom: -185px;
 }
-.settings-modal .modal-container {
+.list-settings-modal .modal-container {
   background-color: #fff;
   width: 240px;
   border: 1px solid rgb(236, 236, 236);
   border-radius: 3px;
 }
-.settings-modal .modal-header {}
-.settings-modal .modal-title {
+.list-settings-modal .modal-header {}
+.list-settings-modal .modal-title {
   margin: 0;
   padding: 9px 8px 9px 52px;
   font-weight: normal;
   font-size: 14px;
 }
-.settings-modal .modal-close {
+.list-settings-modal .modal-close {
   box-sizing: border-box;
   width: 35px;
   height: 35px;
@@ -266,15 +264,15 @@
   cursor: pointer;
   transition: background-color .3s;
 }
-.settings-modal .modal-close:hover {
+.list-settings-modal .modal-close:hover {
   background-color: rgb(235, 233, 233);
 }
-.settings-modal .modal-body {
+.list-settings-modal .modal-body {
   display: flex;
   flex-direction: column;
   padding: 10px 0;
 }
-.settings-modal button {
+.list-settings-modal button {
   width: 100%;
   height: 32px;
   border: none;
@@ -283,13 +281,76 @@
   text-align: left;
   color: #172b4d;
 }
-.settings-modal button:hover {
+.list-settings-modal button:hover {
   background-color: rgb(235, 233, 233);
 }
 
 
-.mark-modal {}
+/* Modals inside card modal */
+.marks-container,
+.checklist-container,
+.datetime-container,
+.copy-container,
+.move-container,
+.delete-container {
+  position: relative;
+}
 
+
+/* Marks modal */
+.marks-modal {
+  position: absolute;
+  z-index: 100;
+}
+.marks-modal .modal-container {
+  width: 240px;
+  padding: 10px;
+  border: 1px solid rgb(236, 236, 236);
+  border-radius: 3px;
+}
+.marks-modal .modal-title {
+  font-size: 14px;
+  font-weight: normal;
+  text-align: center;
+  width: 100%;
+}
+.mark-color {
+  width: 100%;
+  height: 32px;
+  border-radius: 3px;
+  margin-bottom: 4px;
+}
+.mark-color:last-child {
+  margin-bottom: 0;
+}
+.mark-color.green {
+  background-color: #61bd4f;
+}
+.mark-color.yellow {
+  background-color: #f2d600;
+}
+.mark-color.orange {
+  background-color: #ff9f1a;
+}
+.mark-color.red {
+  background-color: #eb5a46;
+}
+.mark-color.purple {
+  background-color: #c377e0;
+}
+.mark-color.blue {
+  background-color: #0079bf;
+}
+
+/* Checklist modal */
+
+/* Expiration modal */
+
+/* Move modal */
+
+/* Copy modal */
+
+/* Delete modal */
 
 
 /* TODO:
