@@ -168,17 +168,4 @@ main()
 * copy list +- (fix marks & checklists copying)
 * delete all list cards +
 * delete list +
-*---------------
-* marks modal
-* add/remove mark
-* checklist modal
-* checklist progress bar
-* add/remove checklist
-* expiration modal
-* add/remove expiration
-* move card modal
-* move card
-* copy card modal
-* copy card
-* mark card as done
 **/

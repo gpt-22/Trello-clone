@@ -91,7 +91,7 @@ function _createModalNode(options, modalObj) {
     modalNode.classList.add('modal')
 
     if (options.type !== 'card')
-        modalNode.insertAdjacentHTML('afterbegin', getOptionModalInnerHTML(options.type))
+        modalNode.insertAdjacentHTML('afterbegin', getOptionModalInnerHTML(options.type, options.title))
 
     switch (options.type) {
         case 'card':
@@ -122,40 +122,53 @@ function _createModalNode(options, modalObj) {
                     type: 'marks',
                     container: e.target.parentNode,
                     listID: options.card.list,
-                    cardID: options.card.id
+                    cardID: options.card.id,
+                    title: "Метки"
                 })
             })
             const checklistBtn = modalNode.querySelector('.modal-checklist-btn')
             checklistBtn.addEventListener('click', e => {
                 createModal({
                     type: 'checklist',
-                    container: e.target.parentNode
+                    container: e.target.parentNode,
+                    title: 'Добавление списка задач'
                 })
             })
             const expirationBtn = modalNode.querySelector('.modal-datetime-btn')
             expirationBtn.addEventListener('click', e => {
                 createModal({
                     type: 'expiration',
-                    container: e.target.parentNode
+                    container: e.target.parentNode,
+                    title: 'Изменение даты выполнения'
                 })
             })
             const moveBtn = modalNode.querySelector('.modal-move-btn')
             moveBtn.addEventListener('click', e => {
                 createModal({
                     type: 'moveCard',
-                    container: e.target.parentNode
+                    container: e.target.parentNode,
+                    title: 'Перемещение карточки'
                 })
             })
             const copyBtn = modalNode.querySelector('.modal-copy-btn')
             copyBtn.addEventListener('click', e => {
                 createModal({
                     type: 'copyCard',
-                    container: e.target.parentNode
+                    container: e.target.parentNode,
+                    title: 'Копирование карточки'
                 })
             })
             const deleteBtn = modalNode.querySelector('.modal-delete-btn')
             deleteBtn.addEventListener('click', e => {
-                modalObj.delete(options.card.list, options.card.id)
+                createModal({
+                    type: 'deleteCard',
+                    container: e.target.parentNode,
+                    title: 'Вы действительно хотите удалить карточку?',
+                    cardModalObj: modalObj,
+                    listID: options.card.list,
+                    cardID: options.card.id,
+                    event: e
+                })
             })
             break
         case 'listSettings':
@@ -190,16 +203,23 @@ function _createModalNode(options, modalObj) {
             break
         case 'moveCard':
             modalNode.classList.add('move-card-modal')
-            container.appendChild(modalNode)
+            options.container.appendChild(modalNode)
             break
         case 'copyCard':
             modalNode.classList.add('copy-card-modal')
-            container.appendChild(modalNode)
+            options.container.appendChild(modalNode)
             break
         case 'deleteCard':
             modalNode.classList.add('delete-card-modal')
-            container.appendChild(modalNode)
-            console.log('delete card')
+            const deleteButton = modalNode.querySelector('.delete-card-ok')
+            deleteButton.addEventListener('click', e => {
+                options.cardModalObj.delete(options.listID, options.cardID, e)
+            })
+            const cancelButton = modalNode.querySelector('.delete-card-cancel')
+            cancelButton.addEventListener('click', e => {
+                modalObj.close(e)
+            })
+            options.container.appendChild(modalNode)
             break
         default:
             console.log('invalid type of modal')
@@ -420,6 +440,7 @@ export const createModal = function(options) {
 * move card
 * copy card modal
 * copy card
+* delete card modal +
 * mark card as done
 * */
 

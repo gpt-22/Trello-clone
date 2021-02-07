@@ -27,6 +27,25 @@ textarea:focus {
   box-shadow: inset 0 0 0 2px #0079bf;
 }
 
+.green {
+  background-color: #61bd4f;
+}
+.yellow {
+  background-color: #f2d600;
+}
+.orange {
+  background-color: #ff9f1a;
+}
+.red {
+  background-color: #eb5a46;
+}
+.purple {
+  background-color: #c377e0;
+}
+.blue {
+  background-color: #0079bf;
+}
+
 .primary {
   color: #fff !important;
   background-color: #5aac44 !important;
@@ -243,23 +262,4 @@ textarea:focus {
   height: 8px;
   border-radius: 4px;
   margin: 0 4px 4px 0;
-}
-
-.green {
-  background-color: #61bd4f;
-}
-.yellow {
-  background-color: #f2d600;
-}
-.orange {
-  background-color: #ff9f1a;
-}
-.red {
-  background-color: #eb5a46;
-}
-.purple {
-  background-color: #c377e0;
-}
-.blue {
-  background-color: #0079bf;
 }

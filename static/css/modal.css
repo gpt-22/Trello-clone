@@ -297,26 +297,44 @@
 .delete-container {
   position: relative;
 }
-
-
-/* Marks modal */
-.marks-modal {
+.marks-modal,
+.checklist-modal,
+.expiration-modal,
+.move-card-modal,
+.copy-card-modal,
+.delete-card-modal {
   position: absolute;
   z-index: 100;
 }
-.marks-modal .modal-container {
+
+.marks-modal .modal-container,
+.checklist-modal .modal-container,
+.expiration-modal .modal-container,
+.move-card-modal .modal-container,
+.copy-card-modal .modal-container,
+.delete-card-modal .modal-container {
   width: 240px;
   padding: 10px;
   border: 1px solid rgb(236, 236, 236);
   border-radius: 3px;
 }
-.marks-modal .modal-title {
+.marks-modal .modal-title,
+.checklist-modal .modal-title,
+.expiration-modal .modal-title,
+.move-card-modal .modal-title ,
+.copy-card-modal .modal-title,
+.delete-card-modal .modal-title {
   font-size: 14px;
   font-weight: normal;
   text-align: center;
   width: 100%;
 }
-.marks-modal .modal-close {
+.marks-modal .modal-close,
+.checklist-modal .modal-close,
+.expiration-modal .modal-close,
+.move-card-modal .modal-close,
+.copy-card-modal .modal-close,
+.delete-card-modal .modal-close{
   box-sizing: border-box;
   width: 40px;
   height: 35px;
@@ -326,9 +344,9 @@
   cursor: pointer;
   transition: background-color .3s;
 }
-.marks-modal .modal-close:hover {
-  background-color: rgb(235, 233, 233);
-}
+
+
+/* Marks modal */
 .mark-color {
   position: relative;
   width: 40px;
@@ -365,6 +383,24 @@
 /* Copy modal */
 
 /* Delete modal */
+.delete-card-modal-btns-row {
+  display: flex;
+}
+.delete-card-modal-btns-row > button{
+  width: 100%;
+  height: 32px;
+  border-radius: 3px;
+  border: none;
+  outline: none;
+  margin: 0 0 4px 4px;
+}
+.delete-card-modal-btns-row > button:hover {
+  opacity: .8;
+}
+.delete-card-ok {
+  color: #fff;
+}
+.delete-card-cancel {}
 
 
 /* TODO:

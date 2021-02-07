@@ -145,10 +145,10 @@ export const getCardModalInnerHTML = cardObj => `
 `
 
 
-export const getOptionModalInnerHTML = type => `
+export const getOptionModalInnerHTML = (type, title='Действия со списком') => `
     <div class="modal-container">
         <div class="modal-header">
-            <h3 class="modal-title" >Действия со списком</h3>
+            <h3 class="modal-title" >${title}</h3>
             <span class="modal-close" data-close="true">&#10006;</span>                
         </div>
         <div class="modal-body">
@@ -196,11 +196,16 @@ export const getMarksModalBody = () => `
 `
 
 
-export function getChecklistModalBody() {}
-export function getExpirationModalBody() {}
-export function getMoveCardModalBody() {}
-export function getCopyCardModalBody() {}
-export function getDeleteCardModalBody() {}
+export const getChecklistModalBody = () => ``
+export const getExpirationModalBody = () => ``
+export const getMoveCardModalBody = () => ``
+export const getCopyCardModalBody = () => ``
+export const getDeleteCardModalBody = () => `
+    <div class="delete-card-modal-btns-row">
+        <button class="delete-card-ok red">Удалить</button>
+        <button class="delete-card-cancel">Отмена</button>    
+    </div>
+`
 
 
 export function addCardEvents(card) {
