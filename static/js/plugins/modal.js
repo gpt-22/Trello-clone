@@ -8,6 +8,84 @@ import {
 import {sendRequest, getIDNum} from "../helpers";
 
 
+async function createMark(listID, cardID, color) {
+    // create mark in db +
+    const body = {
+        card: cardID,
+        title: color
+    }
+    const url = `boards/1/lists/${listID}/cards/${cardID}/marks/`
+    await sendRequest('POST', url, body)
+
+    // draw mark on modal +
+    const cardModal = document.querySelector('.card-modal')
+    const cardColLeft = cardModal.querySelector('.modal-marks-block')
+    const mark = document.createElement('div')
+    mark.classList.add('mark-color', color)
+    cardColLeft.append(mark)
+
+    // draw mark on card +
+    const card = document.querySelector('#card' + cardID)
+    const marksContainer = card.querySelector('.card-marks-container')
+    const markHTML = `<div class="card-mark-color ${color}"></div>`
+    marksContainer.append(HTMLToNode(markHTML))
+
+    // add checked element +
+    const marksModal = document.querySelector('.marks-modal')
+    marksModal.querySelector('.' + color).innerHTML = '<div class="mark-color-checked"></div>'
+}
+
+
+async function deleteMark(listID, cardID, color, marks) {
+    // delete from db +
+    const markID = marks.filter(mark => mark.title === color)[0].id
+    const url = `boards/1/lists/${ listID }/cards/${ cardID }/marks/${markID}/`
+    sendRequest('DELETE', url, null).catch(err => console.log(err))
+
+    // delete from modal +
+    const cardModal = document.querySelector('.card-modal')
+    const cardColLeft = cardModal.querySelector('.modal-marks-block')
+    const modalMarksBlock = cardModal.querySelector('.modal-marks-block')
+    const mark = modalMarksBlock.querySelector('.mark-color.' + color)
+    cardColLeft.removeChild(mark)
+
+    // delete from card +
+    const card = document.querySelector('#card' + cardID)
+    const marksContainer = card.querySelector('.card-marks-container')
+    const cardMark = marksContainer.querySelector('.' + color)
+    marksContainer.removeChild(cardMark)
+
+    // delete checked element +
+    const marksModal = document.querySelector('.marks-modal')
+    marksModal.querySelector('.' + color).innerHTML = ''
+}
+
+
+function createOrDeleteMark(listID, cardID) {
+    // closure for passing args in callback function
+    return async e => {
+        const color = e.target.classList[1]
+
+        const getMarksURL = `boards/1/lists/${listID}/cards/${cardID}/marks`
+        const marks = await sendRequest('GET', getMarksURL)
+        for (let mark of marks) {
+            if (mark.title === color) {
+                await deleteMark(listID, cardID, color, marks)
+                return
+            }
+        }
+
+        await createMark(listID, cardID, color)
+    }
+}
+
+
+async function getMarks(listID, cardID) {
+    const getMarksURL = `boards/1/lists/${listID}/cards/${cardID}/marks/`
+    return await sendRequest('GET', getMarksURL)
+}
+
+
 function _createModalNode(options, modalObj) {
     const modalNode = document.createElement('div')
     modalNode.classList.add('modal')
@@ -43,6 +121,7 @@ function _createModalNode(options, modalObj) {
                 createModal({
                     type: 'marks',
                     container: e.target.parentNode,
+                    listID: options.card.list,
                     cardID: options.card.id
                 })
             })
@@ -89,30 +168,17 @@ function _createModalNode(options, modalObj) {
             modalNode.classList.add('marks-modal')
             document.querySelector('.marks-container').appendChild(modalNode)
             const marks = modalNode.querySelectorAll('.mark-color')
-            marks.forEach(mark => mark.addEventListener('click', async e => {
-                // draw mark on modal +
-                const color = e.target.classList[1]
-                const cardModal = document.querySelector('.card-modal')
-                const cardColLeft = cardModal.querySelector('.modal-marks-block')
-                const mark = document.createElement('div')
-                mark.classList.add('mark-color')
-                mark.classList.add(color)
-                cardColLeft.prepend(mark)
-
-                // create mark in db +
-                const body = {
-                    card: options.cardID,
-                    title: color
-                }
-                const url = `boards/1/lists/1/cards/1/marks/`
-                const createdMark = await sendRequest('POST', url, body)
-
-                // draw mark on card +
-                const card = document.querySelector('#card'+options.cardID)
-                const marksContainer = card.querySelector('.card-marks-container')
-                const markHTML = `<div class="card-mark-color ${color}"></div>`
-                marksContainer.append(HTMLToNode(markHTML))
-            }))
+            getMarks(options.listID, options.cardID)
+                .then( marksColors => {
+                    marks.forEach(mark => {
+                        const markColor = mark.classList[1]
+                        marksColors.forEach(color => {
+                            if (color.title === markColor)
+                                mark.innerHTML = '<div class="mark-color-checked"></div>'
+                        })
+                        mark.addEventListener('click', createOrDeleteMark(options.listID, options.cardID))
+                    })
+                })
             break
         case 'checklist':
             modalNode.classList.add('checklist-modal')
@@ -342,7 +408,7 @@ export const createModal = function(options) {
 * marks modal styles +
 * fix marks modal closing +
 * add mark on modal, on card, in db +
-* remove mark from modal, from card, from db
+* remove mark from modal, from card, from db +
 * checklist modal
 * checklist progress bar
 * add checklist

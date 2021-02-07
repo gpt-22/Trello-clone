@@ -5,12 +5,9 @@ import {createModal} from './plugins/modal'
 
 
 // Modals
-async function showCardModal(e) {
-    const listNode = e.target.parentNode.parentNode
-    const listID = getIDNum(listNode.id)
-    const response = await sendRequest('GET', 'boards/1/')
-    const list = response.lists.filter( list => list.id === listID )[0]
-    const card = list.cards.filter( card => card.title === e.target.innerText.trim())[0]
+async function showCardModal(listID, cardID) {
+    const url = `boards/1/lists/${listID}/cards/${cardID}/`
+    const card = await sendRequest('GET', url)
     const options = {
         type: 'card',
         card: card
@@ -116,7 +113,17 @@ const main = async () => {
     document.addEventListener('click', e => {
         // Optimized way to listen click on card instead of adding many eventListeners
         if (e.target.classList.contains('card')) {
-            showCardModal(e)
+            const cardID = getIDNum(e.target.id)
+            const listID = getIDNum(e.target.parentNode.parentNode.id)
+            showCardModal(listID, cardID)
+        } else if (e.target.parentNode.classList.contains('card')) {
+            const cardID = getIDNum(e.target.parentNode.id)
+            const listID = getIDNum(e.target.parentNode.parentNode.parentNode.id)
+            showCardModal(listID, cardID)
+        } else if (e.target.parentNode.parentNode.classList.contains('card')) {
+            const cardID = getIDNum(e.target.parentNode.parentNode.id)
+            const listID = getIDNum(e.target.parentNode.parentNode.parentNode.parentNode.id)
+            showCardModal(listID, cardID)
         } else if (e.target.classList.contains('list__options')) {
             const settingsContainer = e.target.parentNode
             if (settingsContainer.children.length === 1)
