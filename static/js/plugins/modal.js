@@ -3,7 +3,7 @@ import {
     getOptionModalInnerHTML,
     createCardInDOM,
     createListInDOM,
-    deleteFromDOMbyID,
+    deleteFromDOMbyID, HTMLToNode,
 } from "../html";
 import {sendRequest, getIDNum} from "../helpers";
 
@@ -42,7 +42,8 @@ function _createModalNode(options, modalObj) {
             markBtn.addEventListener('click', e => {
                 createModal({
                     type: 'marks',
-                    container: e.target.parentNode
+                    container: e.target.parentNode,
+                    cardID: options.card.id
                 })
             })
             const checklistBtn = modalNode.querySelector('.modal-checklist-btn')
@@ -87,6 +88,31 @@ function _createModalNode(options, modalObj) {
         case 'marks':
             modalNode.classList.add('marks-modal')
             document.querySelector('.marks-container').appendChild(modalNode)
+            const marks = modalNode.querySelectorAll('.mark-color')
+            marks.forEach(mark => mark.addEventListener('click', async e => {
+                // draw mark on modal +
+                const color = e.target.classList[1]
+                const cardModal = document.querySelector('.card-modal')
+                const cardColLeft = cardModal.querySelector('.modal-marks-block')
+                const mark = document.createElement('div')
+                mark.classList.add('mark-color')
+                mark.classList.add(color)
+                cardColLeft.prepend(mark)
+
+                // create mark in db +
+                const body = {
+                    card: options.cardID,
+                    title: color
+                }
+                const url = `boards/1/lists/1/cards/1/marks/`
+                const createdMark = await sendRequest('POST', url, body)
+
+                // draw mark on card +
+                const card = document.querySelector('#card'+options.cardID)
+                const marksContainer = card.querySelector('.card-marks-container')
+                const markHTML = `<div class="card-mark-color ${color}"></div>`
+                marksContainer.append(HTMLToNode(markHTML))
+            }))
             break
         case 'checklist':
             modalNode.classList.add('checklist-modal')
@@ -119,13 +145,14 @@ function _createModalNode(options, modalObj) {
 
 const getCardModalMethods = modalNode => {
     return {
-        close() {
+        close(e) {
             modalNode.classList.remove('open')
             modalNode.classList.add('hiding')
             setTimeout( () => {
                 modalNode.classList.remove('hiding')
                 this.destroy()
             }, 500)
+            e.stopPropagation()
         },
         setModalDescriptionEventListeners(options) {
             const modalDesc = modalNode.querySelector('.modal-description')
@@ -182,10 +209,10 @@ const getCardModalMethods = modalNode => {
             // })
         },
         setChecklistItemsEventListeners() {},
-        delete(listID, cardID) {
+        delete(listID, cardID, e) {
             const url = `boards/1/lists/${ listID }/cards/${ cardID }/`
             sendRequest('DELETE', url, null).catch(err => console.log(err))
-            this.close()
+            this.close(e)
             deleteFromDOMbyID('card'+cardID)
         }
     }
@@ -197,7 +224,7 @@ const getListSettingsModalMethods = (modalNode, listID) => {
         setEventListeners() {
             const addCardBtn = modalNode.querySelector('.settings-modal-add-card-btn')
             addCardBtn.addEventListener('click', e => {
-                this.close()
+                this.close(e)
                 const list = document.getElementById('list'+listID)
                 const addCardBtn = list.querySelector('.add-card-btn')
                 addCardBtn.click()
@@ -234,7 +261,7 @@ const getListSettingsModalMethods = (modalNode, listID) => {
                 const addListBlock = board.querySelector('.add-list-block')
                 board.insertBefore(createdListNode, addListBlock)
                 board.scrollLeft = board.scrollWidth
-                this.close()
+                this.close(e)
            })
             const delAllCardsBtn = modalNode.querySelector('.settings-modal-delete-all-cards-btn')
             delAllCardsBtn.addEventListener('click', e => {
@@ -247,7 +274,7 @@ const getListSettingsModalMethods = (modalNode, listID) => {
                     sendRequest('DELETE', url, null).catch(err => console.log(err))
                     deleteFromDOMbyID('card' + cardID)
                 })
-                this.close()
+                this.close(e)
             })
             const delListBtn = modalNode.querySelector('.settings-modal-delete-list-btn')
             delListBtn.addEventListener('click', e => {
@@ -277,9 +304,10 @@ export const createModal = function(options) {
             if (isDestroyed) return
             modalNode.classList.add('open')
         },
-        close() {
+        close(e) {
             modalNode.classList.remove('open')
             this.destroy()
+            e.stopPropagation()
         },
         destroy() {
             const $modalClone = modalNode.cloneNode(true)
@@ -291,7 +319,7 @@ export const createModal = function(options) {
     const modalNode = _createModalNode(options, modalObj)
 
     modalNode.addEventListener('click', e => {
-        (e.target.dataset.close === 'true') ? modalObj.close() : ''
+        (e.target.dataset.close === 'true') ? modalObj.close(e) : ''
     })
     // as DOM operation are async we need to use setTimeout to see animation open
     setTimeout( () => modalObj.open(), 0)
@@ -311,9 +339,9 @@ export const createModal = function(options) {
 // add modal event listeners
 
 /*TODO
-* marks modal styles
-* fix marks modal closing
-* add mark on modal, on card, in db
+* marks modal styles +
+* fix marks modal closing +
+* add mark on modal, on card, in db +
 * remove mark from modal, from card, from db
 * checklist modal
 * checklist progress bar

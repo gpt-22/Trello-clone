@@ -22,7 +22,7 @@ class MarkSerializer(ModelSerializer):
 
     class Meta:
         model = Mark
-        fields = ['id', 'title']
+        fields = ['id', 'card', 'title']
 
 
 class CardSerializer(ModelSerializer):

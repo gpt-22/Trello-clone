@@ -133,7 +133,9 @@
 .modal-desc-btns button:nth-child(2) {
   margin-left: 10px;
 }
-
+.modal-marks-block {
+  display: flex;
+}
 .checklist-block {}
 .checklist-header {
   display: flex;
@@ -314,32 +316,31 @@
   text-align: center;
   width: 100%;
 }
+.marks-modal .modal-close {
+  box-sizing: border-box;
+  width: 40px;
+  height: 35px;
+  border-radius: 50%;
+  line-height: 35px;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color .3s;
+}
+.marks-modal .modal-close:hover {
+  background-color: rgb(235, 233, 233);
+}
 .mark-color {
-  width: 100%;
+  width: 40px;
   height: 32px;
   border-radius: 3px;
-  margin-bottom: 4px;
+  margin: 0 4px 4px 0;
+}
+.marks-modal .mark-color {
+  width: 100%;
+  margin: 0 0 4px 0;
 }
 .mark-color:last-child {
   margin-bottom: 0;
-}
-.mark-color.green {
-  background-color: #61bd4f;
-}
-.mark-color.yellow {
-  background-color: #f2d600;
-}
-.mark-color.orange {
-  background-color: #ff9f1a;
-}
-.mark-color.red {
-  background-color: #eb5a46;
-}
-.mark-color.purple {
-  background-color: #c377e0;
-}
-.mark-color.blue {
-  background-color: #0079bf;
 }
 
 /* Checklist modal */

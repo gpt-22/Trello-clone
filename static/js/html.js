@@ -21,7 +21,10 @@ export function deleteFromDOMbyID(ID) {
 
 export const cardToHTML = card => `
 <div class="list__item card" draggable="true" id="card${ card.id }">
-    ${ card.title }
+    <div class="card-marks-container">
+        ${ 'marks' in card ? card.marks.map(mark => `<div class="card-mark-color ${mark.title}"></div>`).join('') : ''}
+    </div>
+    <div class="card-title">${card.title}</div>
 </div>
 `
 
@@ -95,6 +98,10 @@ export const getCardModalInnerHTML = cardObj => `
             </div>
             <div class="modal-body">
                 <div class="modal-col modal-col-left">
+                    <div class="modal-marks-block">
+                        ${ 'marks' in cardObj ? cardObj.marks.map(mark => `
+                            <div class="mark-color ${mark.title}"></div>`).join('') : '' }
+                    </div>
                     <div class="modal-desc-block">
                         <h3 class="modal-desc-title">Описание</h3>
                         <textarea class="modal-description" placeholder="Добавьте более подробное описание..." 
@@ -207,7 +214,10 @@ export function createCardInDOM(createdCard) {
     newCard.id = 'card' + createdCard.id
     newCard.className += 'list__item card'
     newCard.setAttribute('draggable', 'true')
-    newCard.innerText = createdCard.title
+    newCard.innerHTML = `
+        <div class="card-marks-container"></div>
+        <div class="card-title">${createdCard.title}</div>
+    `
     addCardEvents(newCard)
 
     return newCard

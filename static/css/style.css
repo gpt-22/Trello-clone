@@ -234,3 +234,32 @@ textarea:focus {
 .add-list-cancel-btn:hover {
   color: #2e518d;
 }
+
+.card-marks-container {
+  display: flex;
+}
+.card-mark-color {
+  width: 40px;
+  height: 8px;
+  border-radius: 4px;
+  margin: 0 4px 4px 0;
+}
+
+.green {
+  background-color: #61bd4f;
+}
+.yellow {
+  background-color: #f2d600;
+}
+.orange {
+  background-color: #ff9f1a;
+}
+.red {
+  background-color: #eb5a46;
+}
+.purple {
+  background-color: #c377e0;
+}
+.blue {
+  background-color: #0079bf;
+}
