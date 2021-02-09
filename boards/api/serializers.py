@@ -7,7 +7,7 @@ class ChecklistItemSerializer(ModelSerializer):
 
     class Meta:
         model = ChecklistItem
-        fields = ['id', 'text']
+        fields = ['id', 'text', 'position']
 
 
 class ChecklistSerializer(ModelSerializer):
@@ -15,7 +15,7 @@ class ChecklistSerializer(ModelSerializer):
 
     class Meta:
         model = Checklist
-        fields = ['id', 'title', 'items']
+        fields = ['id', 'title', 'items', 'position']
 
 
 class MarkSerializer(ModelSerializer):
@@ -31,7 +31,7 @@ class CardSerializer(ModelSerializer):
 
     class Meta:
         model = Card
-        fields = ['id', 'list', 'title', 'description', 'marks', 'checklists', 'expiration', 'created_at']
+        fields = ['id', 'list', 'position', 'title', 'description', 'marks', 'checklists', 'expiration', 'created_at']
 
 
 class ListSerializer(ModelSerializer):
@@ -39,7 +39,7 @@ class ListSerializer(ModelSerializer):
 
     class Meta:
         model = List
-        fields = ['id', 'board', 'title', 'cards']
+        fields = ['id', 'board', 'position', 'title', 'cards']
 
 
 class BoardSerializer(ModelSerializer):

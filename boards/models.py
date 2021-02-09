@@ -17,6 +17,7 @@ class List(models.Model):
 
     board = models.ForeignKey(Board, on_delete=models.CASCADE, related_name='lists')
     title = models.CharField(max_length=128, verbose_name='Заголовок')
+    position = models.PositiveSmallIntegerField(default=0, verbose_name='Позиция на доске')
 
     class Meta:
         verbose_name = 'Список'
@@ -33,6 +34,7 @@ class Card(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     description = models.TextField(verbose_name='Описание', null=True, blank=True)
     expiration = models.DateTimeField(null=True, blank=True)
+    position = models.PositiveSmallIntegerField(default=0, verbose_name='Позиция в списке')
 
     class Meta:
         verbose_name = 'Карточка'
@@ -59,6 +61,7 @@ class Checklist(models.Model):
 
     card = models.ForeignKey(Card, on_delete=models.CASCADE, related_name='checklists')
     title = models.CharField(max_length=128, verbose_name='Заголовок')
+    position = models.PositiveSmallIntegerField(default=0, verbose_name='Позиция на картоке')
 
     class Meta:
         verbose_name = 'Чек-лист'
@@ -72,6 +75,7 @@ class ChecklistItem(models.Model):
 
     checklist = models.ForeignKey(Checklist, on_delete=models.CASCADE, related_name='items')
     text = models.TextField(verbose_name='Текст задачи')
+    position = models.PositiveSmallIntegerField(default=0, verbose_name='Позиция в чек-листе')
 
     class Meta:
         verbose_name = 'Задача чек-листа'
