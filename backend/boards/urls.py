@@ -9,7 +9,6 @@ from boards.api.views import (
     MarkViewSet,
     ChecklistViewSet
 )
-from .views import BoardView
 
 
 router = routers.SimpleRouter()
@@ -44,6 +43,5 @@ api_urlpatterns = [
 ]
 
 urlpatterns = [
-    path('board', BoardView.as_view(), name='board'),
     path('api/', include(api_urlpatterns))
 ]

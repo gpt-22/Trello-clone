@@ -1,4 +1,3 @@
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
 from boards.api.serializers import (
@@ -14,12 +13,10 @@ from boards.models import Board, List, Card, Mark, Checklist
 class BoardViewSet(ModelViewSet):
     serializer_class = BoardSerializer
     queryset = Board.objects.all()
-    permission_classes = [IsAuthenticated]
 
 
 class ListViewSet(ModelViewSet):
     serializer_class = ListSerializer
-    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return List.objects.filter(board=self.kwargs['board_pk'])
@@ -28,7 +25,6 @@ class ListViewSet(ModelViewSet):
 class CardViewSet(ModelViewSet):
     queryset = Card.objects.all()
     serializer_class = CardSerializer
-    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return Card.objects.filter(list=self.kwargs['list_pk'])
@@ -37,7 +33,6 @@ class CardViewSet(ModelViewSet):
 class MarkViewSet(ModelViewSet):
     queryset = Mark.objects.all()
     serializer_class = MarkSerializer
-    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return Mark.objects.filter(card=self.kwargs['card_pk'])
@@ -46,7 +41,6 @@ class MarkViewSet(ModelViewSet):
 class ChecklistViewSet(ModelViewSet):
     queryset = Checklist.objects.all()
     serializer_class = ChecklistSerializer
-    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return Checklist.objects.filter(card=self.kwargs['card_pk'])

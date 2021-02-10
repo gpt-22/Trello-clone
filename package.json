@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development webpack serve --open",
     "prod": "cross-env NODE_ENV=production webpack",
-    "server": "cd venv/Scripts && activate && cd ../.. && manage.py runserver"
+    "server": "cd backend/venv/Scripts && activate && cd ../.. && manage.py runserver"
   },
   "browserslist": "> 0.25%, not dead",
   "repository": {

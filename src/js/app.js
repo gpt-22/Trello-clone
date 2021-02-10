@@ -148,7 +148,7 @@ export const main = async () => {
 
 
 /* TODO:
-* fix eslint with 'no-invalid-this'
+* fix eslint with 'no-invalid-this '
 *---------------
 * drag&drop card +
 * drag&drop list +
