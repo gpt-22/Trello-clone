@@ -5,16 +5,24 @@ const baseURL = 'http://127.0.0.1:8000/api/'
 
 // Functions
 
-export function sendRequest(method, url, body = null) {
-  const csrfToken = document.cookie.match(/csrftoken=([\w-]+)/)[1]
+export function sendRequest(method, url, body) {
   const fetchInit = {
     method: method,
     headers: {
-      'X-CSRFToken': csrfToken,
       'Content-Type': 'application/json; charset=UTF-8',
     },
   }
-  if (body !== null) fetchInit.body = JSON.stringify(body)
+
+  let authentication
+  const accessToken = localStorage.getItem('accessToken')
+
+  if (body) {
+    authentication = 'username' in body && 'password' in body
+    fetchInit.body = JSON.stringify(body)
+  }
+  if (!authentication && accessToken) {
+    fetchInit.headers['Authorization'] = 'Bearer ' + accessToken
+  }
 
   return fetch(baseURL + url, fetchInit).then((response) => {
     if (method !== 'DELETE') return response.json()

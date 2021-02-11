@@ -38,7 +38,7 @@ export const listToHTML = (list) => `
     <div class="list__header">
         <input type="text" class="list__title" value="${ list.title }">
         <div class="options-container">
-            <img src="static/img/list-settings.png" alt="options" class="list__options">
+            <img src="img/list-settings.png" alt="options" class="list__options">
         </div>
     </div>
     <div class="list__body">

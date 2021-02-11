@@ -92,63 +92,71 @@ function addListBlockEventListeners(board) {
 }
 
 
-async function renderLists() {
+function renderLists(board) {
   // Getting HTML
-  const response = await sendRequest('GET', 'boards/1/')
-  const HTML = response.lists.map(listToHTML).join('')
+  const HTML = board.lists.map(listToHTML).join('')
   const app = document.getElementById('app')
   app.insertAdjacentHTML('afterbegin', HTML)
 
   // Adding event listeners
-  const board = document.querySelector('.board')
-  board.addEventListener('dragover', onOverBoard)
-  const lists = board.querySelectorAll('.list')
+  const boardNode = document.querySelector('.board')
+  boardNode.addEventListener('dragover', onOverBoard)
+  const lists = boardNode.querySelectorAll('.list')
   lists.forEach((list) => addListEvents(list, lists))
-  const cards = board.querySelectorAll('.card')
+  const cards = boardNode.querySelectorAll('.card')
   cards.forEach((card) => addCardEvents(card))
   const addCardButtons = document.querySelectorAll('.add-card-btn')
   addCardButtons.forEach((btn) => btn.addEventListener('click', addTextArea))
-  addListBlockEventListeners(board)
+  addListBlockEventListeners(boardNode)
 }
 
 
 // Entry point
 export const main = async () => {
-  await renderLists()
+  sendRequest('POST', 'token/', {
+    'username': 'admin',
+    'password': 'admin',
+  }).then((data) => {
+    localStorage.setItem('refreshToken', data['refresh'])
+    localStorage.setItem('accessToken', data['access'])
+    return sendRequest('GET', 'boards/1/')
+  }).then((board) => {
+    renderLists(board)
 
-  document.addEventListener('click', (e) => {
-    // Optimized way to listen click on card instead of adding many eventListeners
-    if (e.target.classList.contains('card')) {
-      const cardID = getIDNum(e.target.id)
-      const listID = getIDNum(e.target.parentNode.parentNode.id)
-      showCardModal(listID, cardID)
-    } else if (e.target.parentNode.classList.contains('card')) {
-      const cardID = getIDNum(e.target.parentNode.id)
-      const listID = getIDNum(e.target.parentNode.parentNode.parentNode.id)
-      showCardModal(listID, cardID)
-    } else if (e.target.parentNode.parentNode.classList.contains('card')) {
-      const cardID = getIDNum(e.target.parentNode.parentNode.id)
-      const listID = getIDNum(e.target.parentNode.parentNode.parentNode.parentNode.id)
-      showCardModal(listID, cardID)
-    } else if (e.target.classList.contains('list__options')) {
-      const settingsContainer = e.target.parentNode
-      if (settingsContainer.children.length === 1) {
-        showSettingsModal(e, settingsContainer)
-      } else {
-        const modalNode = e.target.parentNode.querySelector('.list-settings-modal')
-        // remove all event listeners
-        const modalClone = modalNode.cloneNode(true)
-        modalNode.parentNode.replaceChild(modalClone, modalNode)
-        // remove from DOM
-        modalClone.parentNode.removeChild(modalClone)
+    document.addEventListener('click', (e) => {
+      // Optimized way to listen click on card instead of adding many eventListeners
+      if (e.target.classList.contains('card')) {
+        const cardID = getIDNum(e.target.id)
+        const listID = getIDNum(e.target.parentNode.parentNode.id)
+        showCardModal(listID, cardID)
+      } else if (e.target.parentNode.classList.contains('card')) {
+        const cardID = getIDNum(e.target.parentNode.id)
+        const listID = getIDNum(e.target.parentNode.parentNode.parentNode.id)
+        showCardModal(listID, cardID)
+      } else if (e.target.parentNode.parentNode.classList.contains('card')) {
+        const cardID = getIDNum(e.target.parentNode.parentNode.id)
+        const listID = getIDNum(e.target.parentNode.parentNode.parentNode.parentNode.id)
+        showCardModal(listID, cardID)
+      } else if (e.target.classList.contains('list__options')) {
+        const settingsContainer = e.target.parentNode
+        if (settingsContainer.children.length === 1) {
+          showSettingsModal(e, settingsContainer)
+        } else {
+          const modalNode = e.target.parentNode.querySelector('.list-settings-modal')
+          // remove all event listeners
+          const modalClone = modalNode.cloneNode(true)
+          modalNode.parentNode.replaceChild(modalClone, modalNode)
+          // remove from DOM
+          modalClone.parentNode.removeChild(modalClone)
+        }
       }
-    }
+    })
   })
 }
 
 
 /* TODO:
-* fix eslint with 'no-invalid-this '
+* fix eslint with 'no-invalid-this'
 *---------------
 * drag&drop card +
 * drag&drop list +
