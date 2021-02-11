@@ -1,14 +1,19 @@
 {
   "parser": "babel-eslint",
-  "rules": {
-    "no-unused-vars": "warn",
-    "no-undef": "warn"
-  },
   "env": {
     "es6": true,
-    "browser": true
+    "browser": true,
+    "node": true
   },
-  "extends": [
-    "eslint:recommended"
-  ]
+  "extends": ["eslint:recommended", "google"],
+  "rules": {
+    "strict": "off",
+    "semi": "off",
+    "max-len": "off",
+    "require-jsdoc": "off",
+    "new-cap": "off",
+    "no-invalid-this": "off",
+    "no-unused-vars": "warn",
+    "no-undef": "warn"
+  }
 }
