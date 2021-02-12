@@ -92,6 +92,24 @@ export const checkListToHTML = (checkList) => `
 `
 
 
+export const getAddListBlockHTML = () => `
+    <div class="add-list-block">
+        <button class="show-form-btn">
+            <svg width="16" height="16" fill="#fff" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" data-svg="plus">
+                <rect x="9" y="1" width="2" height="17"></rect><rect x="1" y="9" width="17" height="2"></rect>
+            </svg>
+            Добавить колонку
+        </button>
+        <form class="add-list-form">
+            <input type="text" class="add-list-input" placeholder="Заголовок списка">
+            <div class="add-list-form-controls">
+                <button type="button" class="add-list-btn">Добавить список</button>
+                <button type="button" class="add-list-cancel-btn">&#10006;</button>
+            </div>
+        </form>
+    </div>
+`
+
 export const getCardModalInnerHTML = (cardObj) => `
     <div class="modal-overlay" data-close="true">
         <div class="modal-container">

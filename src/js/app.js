@@ -6,8 +6,12 @@ import {
   addCardEvents,
   addTextArea,
   createList,
+  getAddListBlockHTML,
 } from './html'
 import {createModal} from './plugins/modal'
+import {App} from './components/app/App';
+import {Header} from './components/header/Header';
+import {Board} from './components/board/Board';
 
 
 // Modals
@@ -96,7 +100,8 @@ function renderLists(board) {
   // Getting HTML
   const HTML = board.lists.map(listToHTML).join('')
   const app = document.getElementById('app')
-  app.insertAdjacentHTML('afterbegin', HTML)
+  app.insertAdjacentHTML('beforeend', HTML)
+  app.insertAdjacentHTML('beforeend', getAddListBlockHTML())
 
   // Adding event listeners
   const boardNode = document.querySelector('.board')
@@ -121,36 +126,42 @@ export const main = async () => {
     localStorage.setItem('accessToken', data['access'])
     return sendRequest('GET', 'boards/1/')
   }).then((board) => {
-    renderLists(board)
-
-    document.addEventListener('click', (e) => {
-      // Optimized way to listen click on card instead of adding many eventListeners
-      if (e.target.classList.contains('card')) {
-        const cardID = getIDNum(e.target.id)
-        const listID = getIDNum(e.target.parentNode.parentNode.id)
-        showCardModal(listID, cardID)
-      } else if (e.target.parentNode.classList.contains('card')) {
-        const cardID = getIDNum(e.target.parentNode.id)
-        const listID = getIDNum(e.target.parentNode.parentNode.parentNode.id)
-        showCardModal(listID, cardID)
-      } else if (e.target.parentNode.parentNode.classList.contains('card')) {
-        const cardID = getIDNum(e.target.parentNode.parentNode.id)
-        const listID = getIDNum(e.target.parentNode.parentNode.parentNode.parentNode.id)
-        showCardModal(listID, cardID)
-      } else if (e.target.classList.contains('list__options')) {
-        const settingsContainer = e.target.parentNode
-        if (settingsContainer.children.length === 1) {
-          showSettingsModal(e, settingsContainer)
-        } else {
-          const modalNode = e.target.parentNode.querySelector('.list-settings-modal')
-          // remove all event listeners
-          const modalClone = modalNode.cloneNode(true)
-          modalNode.parentNode.replaceChild(modalClone, modalNode)
-          // remove from DOM
-          modalClone.parentNode.removeChild(modalClone)
-        }
-      }
+    const app = new App('#app', {
+      components: [Header, Board],
+      data: {0: {}, 1: board},
     })
+
+    app.renderPage()
+
+    // renderLists(board)
+    // document.addEventListener('click', (e) => {
+    //   // Optimized way to listen click on card instead of adding many eventListeners
+    //   if (e.target.classList.contains('card')) {
+    //     const cardID = getIDNum(e.target.id)
+    //     const listID = getIDNum(e.target.parentNode.parentNode.id)
+    //     showCardModal(listID, cardID)
+    //   } else if (e.target.parentNode.classList.contains('card')) {
+    //     const cardID = getIDNum(e.target.parentNode.id)
+    //     const listID = getIDNum(e.target.parentNode.parentNode.parentNode.id)
+    //     showCardModal(listID, cardID)
+    //   } else if (e.target.parentNode.parentNode.classList.contains('card')) {
+    //     const cardID = getIDNum(e.target.parentNode.parentNode.id)
+    //     const listID = getIDNum(e.target.parentNode.parentNode.parentNode.parentNode.id)
+    //     showCardModal(listID, cardID)
+    //   } else if (e.target.classList.contains('list__options')) {
+    //     const settingsContainer = e.target.parentNode
+    //     if (settingsContainer.children.length === 1) {
+    //       showSettingsModal(e, settingsContainer)
+    //     } else {
+    //       const modalNode = e.target.parentNode.querySelector('.list-settings-modal')
+    //       // remove all event listeners
+    //       const modalClone = modalNode.cloneNode(true)
+    //       modalNode.parentNode.replaceChild(modalClone, modalNode)
+    //       // remove from DOM
+    //       modalClone.parentNode.removeChild(modalClone)
+    //     }
+    //   }
+    // })
   })
 }
 
