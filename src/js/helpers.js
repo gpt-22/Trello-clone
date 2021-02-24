@@ -42,3 +42,8 @@ export const isValidTitle = (title) => {
 
 
 export const getIDNum = (strWithID) => +(strWithID.match(/\d+/)[0])
+
+
+export const getListenerMethod = (listener) => {
+  return 'on' + listener.charAt(0).toUpperCase() + listener.slice(1)
+}

@@ -26,7 +26,7 @@ module.exports = {
   target: 'web',
   context: path.resolve(__dirname, 'src'),
   mode: isProd ? 'production' : 'development',
-  entry: ['@babel/polyfill', './js/index.js'],
+  entry: ['@babel/polyfill', './js/app.js'],
   output: {
     filename: getFilename('js'),
     path: path.resolve(__dirname, 'dist'),
