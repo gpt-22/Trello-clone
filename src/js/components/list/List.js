@@ -91,20 +91,12 @@ export class List extends BaseComponent {
 
   onDragstart() {
     this.eventDispatcher.dispatch('List:dragstart')
-    const lists = document.querySelectorAll('.list')
-    lists.forEach((list) => {
-      list.removeEventListener('dragover', this.onDragover)
-    })
     this.rootNode.classList.add('dragging-list')
   }
 
   onDragend() {
     this.eventDispatcher.dispatch('List:dragend')
-    const lists = document.querySelectorAll('.list')
     this.rootNode.classList.remove('dragging-list')
-    lists.forEach((list) => {
-      list.addEventListener('dragover', this.onDragover)
-    })
   }
 }
 
