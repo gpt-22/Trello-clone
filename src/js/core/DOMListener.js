@@ -28,6 +28,4 @@ export class DOMListener {
   removeListeners() {
     this.listeners.forEach((listener) => this.removeListener(listener))
   }
-
-  init() {}
 }

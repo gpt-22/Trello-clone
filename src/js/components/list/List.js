@@ -1,6 +1,6 @@
 import {BaseComponent} from '../../core/BaseComponent';
 import {Card} from '../card/Card';
-import {dom, HTMLToNode} from '../../core/DOM';
+import {dom} from '../../core/DOM';
 import {isValidTitle, sendRequest} from '../../helpers';
 import {listToHTML} from '../../html';
 import {getOnDragover} from '../../drag-n-drop';
@@ -18,13 +18,12 @@ export class List extends BaseComponent {
       listeners: ['click', 'dragover', 'dragstart', 'dragend'],
       ...options,
     })
-    console.log(this.eventDispatcher)
   }
 
   init() {
     super.init()
-    this.eventDispatcher.listen('List:dragstart', () => this.removeListener('dragover'))
-    this.eventDispatcher.listen('List:dragend', () => this.addListener('dragover'))
+    this.on('List:dragstart', () => this.removeListener('dragover'))
+    this.on('List:dragend', () => this.addListener('dragover'))
   }
 
   render() {
@@ -56,6 +55,40 @@ export class List extends BaseComponent {
     `
   }
 
+  showNewListTitleInput(listBody) {
+    const textArea = dom.create(
+        'textarea',
+        '',
+        'add-card-text',
+        {
+          'placeholder': 'Введите заголовок для этой карточки',
+          'rows': 3,
+        }
+    )
+
+    textArea.addEventListener('keyup', (e) => {
+      (e.key === 13) ? textArea.blur() : {}
+    })
+
+    textArea.addEventListener('blur', () => {
+      // addCardOrHideTextArea
+      const listBody = textArea.parentNode
+      const title = textArea.value
+      if (isValidTitle(title)) {
+        // rewrite
+        // createCard(e, title, listBody, this).then( () => {
+        //   this.value = ''
+        //   this.focus()
+        // })
+      } else listBody.removeChild(textArea)
+      listBody.scrollTop = listBody.scrollHeight
+    })
+
+    listBody.appendChild(textArea)
+    textArea.focus()
+    listBody.scrollTop = listBody.scrollHeight
+  }
+
   async create(title) {
     // create in DB
     const body = {
@@ -69,7 +102,7 @@ export class List extends BaseComponent {
     const newList = HTMLToNode(listToHTML(createdList))
     // const lists = document.querySelectorAll('.list')
     // addListEvents(newList, lists)
-    newList.querySelector('.add-card-btn').addEventListener('click', addTextArea)
+    newList.querySelector('.add-card-btn').addEventListener('click', this.showNewListTitleInput)
 
     return newList
   }
@@ -78,7 +111,7 @@ export class List extends BaseComponent {
   onClick(event) {
     if (event.target.classList.contains('add-card-btn')) {
       const listBody = this.rootNode.querySelector('.list__body')
-      addTextArea(listBody)
+      this.showNewListTitleInput(listBody)
     }
   }
 
@@ -90,42 +123,12 @@ export class List extends BaseComponent {
   )
 
   onDragstart() {
-    this.eventDispatcher.dispatch('List:dragstart')
+    this.dispatch('List:dragstart')
     this.rootNode.classList.add('dragging-list')
   }
 
   onDragend() {
-    this.eventDispatcher.dispatch('List:dragend')
+    this.dispatch('List:dragend')
     this.rootNode.classList.remove('dragging-list')
   }
-}
-
-function addCardOrHideTextArea() {
-  const listBody = this.parentNode
-  const title = this.value
-  if (isValidTitle(title)) {
-    // rewrite
-    // createCard(e, title, listBody, this).then( () => {
-    //   this.value = ''
-    //   this.focus()
-    // })
-  } else listBody.removeChild(this)
-  listBody.scrollTop = listBody.scrollHeight
-}
-
-function addTextArea(listBody) {
-  const textArea = dom.create(
-      'textarea',
-      '',
-      'add-card-text',
-      {
-        'placeholder': 'Введите заголовок для этой карточки',
-        'rows': 3,
-      }
-  )
-  textArea.addEventListener('keyup', (e) => (e.keyCode === 13) ? textArea.blur() : {})
-  textArea.addEventListener('blur', addCardOrHideTextArea)
-  listBody.appendChild(textArea)
-  textArea.focus()
-  listBody.scrollTop = listBody.scrollHeight
 }

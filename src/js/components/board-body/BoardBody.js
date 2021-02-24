@@ -33,8 +33,8 @@ export class BoardBody extends BaseComponent {
 
   init() {
     super.init()
-    this.eventDispatcher.listen('Card:dragstart', () => this.removeListener('dragover'))
-    this.eventDispatcher.listen('Card:dragend', () => this.addListener('dragover'))
+    this.on('Card:dragstart', () => this.removeListener('dragover'))
+    this.on('Card:dragend', () => this.addListener('dragover'))
   }
 
   // listener's methods

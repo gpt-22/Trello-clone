@@ -6,6 +6,7 @@ export class BaseComponent extends DOMListener {
     this.eventDispatcher = options.eventDispatcher
     this.components = 'components' in options ? options.components : []
     this.data = 'data' in options ? options.data : []
+    this.unsubscribers = []
   }
 
   init() {
@@ -13,8 +14,20 @@ export class BaseComponent extends DOMListener {
     this.components.forEach((component) => component.init())
   }
 
+  dispatch(event, ...args) {
+    // notice listeners about events
+    this.eventDispatcher.dispatch(event, ...args)
+  }
+
+  on(event, callback) {
+    // subscribe on event
+    const unsubFunc = this.eventDispatcher.listen(event, callback)
+    this.unsubscribers.push(unsubFunc)
+  }
+
   destroy() {
     this.removeListeners()
+    this.unsubscribers.forEach((unsub) => unsub())
     this.components.forEach((component) => component.destroy())
   }
 

@@ -34,13 +34,13 @@ export class Card extends BaseComponent {
   // listener's methods
   onDragstart(event) {
     event.stopPropagation()
-    this.eventDispatcher.dispatch('Card:dragstart')
+    this.dispatch('Card:dragstart')
     this.rootNode.classList.add('dragging')
   }
 
   onDragend(event) {
     event.stopPropagation()
-    this.eventDispatcher.dispatch('Card:dragend')
+    this.dispatch('Card:dragend')
     this.rootNode.classList.remove('dragging')
   }
 }
