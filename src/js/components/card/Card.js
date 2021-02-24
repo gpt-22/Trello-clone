@@ -2,16 +2,17 @@ import {BaseComponent} from '../../core/BaseComponent';
 import {dom} from '../../core/DOM';
 
 export class Card extends BaseComponent {
-  constructor(data) {
+  constructor(options) {
     const componentNode = dom.create(
         'div',
-        `card${ data.id }`,
+        `card${ options.data.id }`,
         'list__item card',
         {'draggable': true}
     )
     super(componentNode, {
-      components: [],
-      data: data,
+      name: 'Card',
+      listeners: ['dragstart', 'dragend'],
+      ...options,
     })
   }
 
@@ -28,5 +29,18 @@ export class Card extends BaseComponent {
         </div>
         <div class="card-title">${card.title}</div>
     `
+  }
+
+  // listener's methods
+  onDragstart(event) {
+    event.stopPropagation()
+    this.eventDispatcher.dispatch('Card:dragstart')
+    this.rootNode.classList.add('dragging')
+  }
+
+  onDragend(event) {
+    event.stopPropagation()
+    this.eventDispatcher.dispatch('Card:dragend')
+    this.rootNode.classList.remove('dragging')
   }
 }

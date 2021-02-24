@@ -2,11 +2,11 @@ import {BaseComponent} from '../../core/BaseComponent';
 import {dom} from '../../core/DOM';
 
 export class BoardHeader extends BaseComponent {
-  constructor(data) {
+  constructor(options) {
     const componentNode = dom.create('div', '', 'board__header')
     super(componentNode, {
-      components: [],
-      data: data,
+      name: 'BoardHeader',
+      ...options,
     })
   }
 

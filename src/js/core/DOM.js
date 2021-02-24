@@ -1,7 +1,28 @@
 class DOM {}
 
+
+export function HTMLToNode(HTML) {
+  const div = document.createElement('div')
+  div.innerHTML = HTML.trim()
+  return div.firstChild
+}
+
+export function deleteFromDOMbyID(ID) {
+  const node = document.getElementById(ID)
+  // remove all event listeners
+  const nodeClone = node.cloneNode(true)
+  node.parentNode.replaceChild(nodeClone, node)
+  // remove from DOM
+  nodeClone.parentNode.removeChild(nodeClone)
+}
+
 export function dom() {
   return new DOM()
+}
+
+dom.get = (selector, all=false) => {
+  if (all) return document.querySelectorAll(selector)
+  else return document.querySelector(selector)
 }
 
 dom.create = (tagName, id='', classes='', attrs={}) => {
@@ -13,4 +34,7 @@ dom.create = (tagName, id='', classes='', attrs={}) => {
   return element
 }
 
+dom.on = (eventType, callback) => {
+
+}
 // create html methods

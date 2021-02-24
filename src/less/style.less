@@ -104,6 +104,12 @@ textarea:focus {
   height: 100%;
 }
 
+.board__lists-container {
+  display: flex;
+  align-items: flex-start;
+  height: 100%;
+}
+
 .list {
   flex-shrink: 0;
   width: 272px;
@@ -155,7 +161,7 @@ textarea:focus {
   padding: 8px 8px 6px;
   border-radius: 3px;
   background-color: #fff;
-  box-shadow: 0 1px 0 rgb(9 30 2.64%);
+  box-shadow: 0 1px 0 rgb(9 30 66 / 25%);
   display: block;
   width: 100%;
   margin-bottom: 8px;
@@ -247,30 +253,30 @@ textarea:focus {
 }
 .add-list-form-controls {
   padding: 2px 0 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-column-gap: 4px;
+  line-height: 20px;
 }
-.add-list-btn {
-  width: 50%;
+.add-list-form-controls button {
   height: 32px;
   border: none;
   outline: none;
+}
+.add-list-btn {
   font-size: 14px;
-  line-height: 20px;
   color: #fff;
   background-color: #5aac44;
   border-radius: 3px;
 }
 .add-list-cancel-btn {
-  width: 32px;
-  height: 32px;
-  border: none;
-  outline: none;
   font-size: 20px;
-  line-height: 20px;
   vertical-align: -2px;
   color: #6981ac;
-  transition: color .3s;
+  transition: background-color .3s, color .3s;
 }
 .add-list-cancel-btn:hover {
+  background-color: #ddd;
   color: #2e518d;
 }
 

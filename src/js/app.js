@@ -1,123 +1,41 @@
-import {onOverBoard} from './drag-n-drop';
-import {sendRequest, isValidTitle, getIDNum} from './helpers'
-import {
-  listToHTML,
-  addListEvents,
-  addCardEvents,
-  addTextArea,
-  createList,
-  getAddListBlockHTML,
-} from './html'
-import {createModal} from './plugins/modal'
+import './../less/theme.less'
+
+import {sendRequest,
+  // getIDNum
+} from './helpers'
+// import {createModal} from './plugins/modal'
 import {App} from './components/app/App';
 import {Header} from './components/header/Header';
 import {Board} from './components/board/Board';
+import {EventDispatcher} from './core/EventDispatcher';
 
 
 // Modals
-async function showCardModal(listID, cardID) {
-  const url = `boards/1/lists/${listID}/cards/${cardID}/`
-  const card = await sendRequest('GET', url)
-  const options = {
-    type: 'card',
-    card: card,
-  }
-  createModal(options)
-}
-
-
-function showSettingsModal(e, settingsContainer) {
-  const listNode = e.target.parentNode.parentNode.parentNode
-  const listID = getIDNum(listNode.id)
-  const options = {
-    type: 'listSettings',
-    listID: listID,
-    container: settingsContainer,
-  }
-  createModal(options)
-}
-
-
-// Add list form
-function showAddListForm() {
-  const addListBlock = document.querySelector('.add-list-block')
-  const showFormBtn = addListBlock.querySelector('.show-form-btn')
-  const addListForm = addListBlock.querySelector('.add-list-form')
-  const formInput = addListBlock.querySelector('.add-list-input')
-  showFormBtn.style.display = 'none'
-  addListForm.style.display = 'block'
-  formInput.focus()
-  addListForm.addEventListener('submit', (e) => e.preventDefault()) // prevent reloading if in input enter is pressed
-  formInput.addEventListener('keyup', (e) => (e.keyCode === 13) ? addListOrHideListInput() : {})
-  document.addEventListener('click', closeAddListForm)
-}
-
-
-function hideAddListForm() {
-  const addListBlock = document.querySelector('.add-list-block')
-  const showFormBtn = addListBlock.querySelector('.show-form-btn')
-  const addListForm = addListBlock.querySelector('.add-list-form')
-  showFormBtn.style.display = 'block'
-  addListForm.style.display = 'none'
-  document.removeEventListener('click', closeAddListForm)
-}
-
-
-const closeAddListForm = () => {
-  const formInput = document.querySelector('.add-list-input')
-    document.activeElement !== formInput ? hideAddListForm() : ''
-}
-
-
-async function addListOrHideListInput() {
-  const formInput = document.querySelector('.add-list-input')
-  if (isValidTitle(formInput.value)) {
-    const newList = await createList(formInput.value)
-    const board = document.querySelector('.board')
-    const addListBlock = document.querySelector('.add-list-block')
-    board.insertBefore(newList, addListBlock)
-    board.scrollLeft = board.scrollWidth
-    formInput.value = ''
-    formInput.focus()
-  }
-}
-
-
-function addListBlockEventListeners(board) {
-  const addListBlock = board.querySelector('.add-list-block')
-  const formInput = addListBlock.querySelector('.add-list-input')
-  addListBlock.addEventListener('click', () => formInput.focus())
-  const showFormBtn = addListBlock.querySelector('.show-form-btn')
-  showFormBtn.addEventListener('click', showAddListForm)
-  const addListBtn = addListBlock.querySelector('.add-list-btn')
-  addListBtn.addEventListener('click', addListOrHideListInput)
-  const cancelBtn = addListBlock.querySelector('.add-list-cancel-btn')
-  cancelBtn.addEventListener('click', hideAddListForm)
-}
-
-
-function renderLists(board) {
-  // Getting HTML
-  const HTML = board.lists.map(listToHTML).join('')
-  const app = document.getElementById('app')
-  app.insertAdjacentHTML('beforeend', HTML)
-  app.insertAdjacentHTML('beforeend', getAddListBlockHTML())
-
-  // Adding event listeners
-  const boardNode = document.querySelector('.board')
-  boardNode.addEventListener('dragover', onOverBoard)
-  const lists = boardNode.querySelectorAll('.list')
-  lists.forEach((list) => addListEvents(list, lists))
-  const cards = boardNode.querySelectorAll('.card')
-  cards.forEach((card) => addCardEvents(card))
-  const addCardButtons = document.querySelectorAll('.add-card-btn')
-  addCardButtons.forEach((btn) => btn.addEventListener('click', addTextArea))
-  addListBlockEventListeners(boardNode)
-}
+// async function showCardModal(listID, cardID) {
+//   const url = `boards/1/lists/${listID}/cards/${cardID}/`
+//   const card = await sendRequest('GET', url)
+//   const options = {
+//     type: 'card',
+//     card: card,
+//   }
+//   createModal(options)
+// }
+//
+//
+// function showSettingsModal(e, settingsContainer) {
+//   const listNode = e.target.parentNode.parentNode.parentNode
+//   const listID = getIDNum(listNode.id)
+//   const options = {
+//     type: 'listSettings',
+//     listID: listID,
+//     container: settingsContainer,
+//   }
+//   createModal(options)
+// }
 
 
 // Entry point
-export const main = async () => {
+const main = async () => {
   sendRequest('POST', 'token/', {
     'username': 'admin',
     'password': 'admin',
@@ -128,10 +46,13 @@ export const main = async () => {
   }).then((board) => {
     const app = new App('#app', {
       components: [Header, Board],
-      data: {0: {}, 1: board},
+      data: {
+        0: {},
+        1: board,
+      },
     })
 
-    app.renderPage()
+    app.render()
 
     // renderLists(board)
     // document.addEventListener('click', (e) => {
@@ -165,6 +86,8 @@ export const main = async () => {
   })
 }
 
+
+main().catch((err) => console.log(err))
 
 /* TODO:
 * fix eslint with 'no-invalid-this'

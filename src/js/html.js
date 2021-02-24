@@ -1,22 +1,4 @@
-import {cardOnDragEnd, cardOnDragStart, onOverList} from './drag-n-drop';
-import {sendRequest, getIDNum, isValidTitle} from './helpers';
-
-
-export function HTMLToNode(HTML) {
-  const div = document.createElement('div')
-  div.innerHTML = HTML.trim()
-  return div.firstChild
-}
-
-
-export function deleteFromDOMbyID(ID) {
-  const node = document.getElementById(ID)
-  // remove all event listeners
-  const nodeClone = node.cloneNode(true)
-  node.parentNode.replaceChild(nodeClone, node)
-  // remove from DOM
-  nodeClone.parentNode.removeChild(nodeClone)
-}
+import {sendRequest, getIDNum} from './helpers';
 
 
 const getCardMarkHTML = (title) => `
@@ -223,12 +205,6 @@ export const getDeleteCardModalBody = () => `
 `
 
 
-export function addCardEvents(card) {
-  card.addEventListener('dragstart', cardOnDragStart)
-  card.addEventListener('dragend', cardOnDragEnd)
-}
-
-
 export function createCardInDOM(createdCard) {
   const newCard = document.createElement('div')
   newCard.id = 'card' + createdCard.id
@@ -238,7 +214,7 @@ export function createCardInDOM(createdCard) {
         <div class="card-marks-container"></div>
         <div class="card-title">${createdCard.title}</div>
     `
-  addCardEvents(newCard)
+  // addCardEvents(newCard)
 
   return newCard
 }
@@ -257,23 +233,11 @@ export async function createCard(e, title, listBody, textArea) {
 }
 
 
-export function addListEvents(list, lists) {
-  list.addEventListener('dragover', onOverList)
-  list.addEventListener('dragstart', () => {
-    lists.forEach((list) => list.removeEventListener('dragover', onOverList))
-    list.classList.add('dragging-list')
-  })
-  list.addEventListener('dragend', () => {
-    list.classList.remove('dragging-list')
-    lists.forEach((list) => list.addEventListener('dragover', onOverList))
-  })
-}
-
-
+// delete
 export function createListInDOM(createdList) {
   const newList = HTMLToNode(listToHTML(createdList))
   const lists = document.querySelectorAll('.list')
-  addListEvents(newList, lists)
+  // addListEvents(newList, lists)
   newList.querySelector('.add-card-btn').addEventListener('click', addTextArea)
 
   return newList
@@ -288,31 +252,4 @@ export async function createList(title) {
   const url = `boards/1/lists/`
   const createdList = await sendRequest('POST', url, body)
   return createListInDOM(createdList)
-}
-
-
-export function addTextArea() {
-  const listBody = this.parentElement.parentElement.querySelector('.list__body')
-  const textArea = document.createElement('textarea')
-  textArea.classList.add('add-card-text')
-  textArea.placeholder = 'Введите заголовок для этой карточки'
-  textArea.rows = 3
-  textArea.addEventListener('keyup', (e) => (e.keyCode === 13) ? textArea.blur() : {})
-  textArea.addEventListener('blur', addCardOrHideTextArea)
-  listBody.appendChild(textArea)
-  textArea.focus()
-  listBody.scrollTop = listBody.scrollHeight
-}
-
-
-function addCardOrHideTextArea(e) {
-  const listBody = this.parentNode
-  const title = this.value
-  if (isValidTitle(title)) {
-    createCard(e, title, listBody, this).then( () => {
-      this.value = ''
-      this.focus()
-    })
-  } else listBody.removeChild(this)
-  listBody.scrollTop = listBody.scrollHeight
 }
