@@ -1,9 +1,9 @@
+// vars
 
-// Vars
 const baseURL = 'http://127.0.0.1:8000/api/'
 
 
-// Functions
+// functions
 
 export function sendRequest(method, url, body) {
   const fetchInit = {
@@ -29,7 +29,7 @@ export function sendRequest(method, url, body) {
   })
 }
 
-
+// list/card title validation
 export const isValidTitle = (title) => {
   const NUM = '1234567890'
   const ENG = 'abcdefghijklmnopqrstuvwxyz' +
@@ -40,10 +40,10 @@ export const isValidTitle = (title) => {
   return ENG.includes(char) || RUS.includes(char) || NUM.includes(char)
 }
 
-
+// returns list or card id number 123 from string like "list123"/"card123"
 export const getIDNum = (strWithID) => +(strWithID.match(/\d+/)[0])
 
-
+// returns listener method name for components
 export const getListenerMethod = (listener) => {
   return 'on' + listener.charAt(0).toUpperCase() + listener.slice(1)
 }

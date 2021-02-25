@@ -1,8 +1,10 @@
+// returns formula to calculate offset depending on axis
 const _getOffset = (position, axis, rect) => {
   if (axis === 'x') return position.x - rect.left - rect.width / 2
   else return position.y - rect.top - rect.height / 2
 }
 
+// returns node to insert dragging element before
 export function getBeforeNode(position, container, axis, elementCls, draggingCls) {
   const notDraggingElements = [
     ...container.querySelectorAll(`${elementCls}:not(${draggingCls})`),
@@ -22,6 +24,7 @@ export function getBeforeNode(position, container, axis, elementCls, draggingCls
   ).element
 }
 
+// returns enclosed function for BoardBody and List dragover events
 export function getOnDragover(getContainer, axis, cls, draggingCls) {
   return (event) => {
     event.preventDefault() // enable drop event

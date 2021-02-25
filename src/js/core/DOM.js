@@ -32,3 +32,11 @@ dom.HTMLToNode = (HTML) => {
   div.innerHTML = HTML.trim()
   return div.firstChild
 }
+
+// returns node that has class if it or one of its parents has the class classname
+// rootNode is an end search point
+dom.findParentNodeWithTheClass = (node, classname, rootNode) => {
+  if (node.className.split(' ').indexOf(classname)>=0) return node
+  if (node === rootNode) return false
+  return dom.findParentNodeWithTheClass(node.parentNode, classname, rootNode)
+}
