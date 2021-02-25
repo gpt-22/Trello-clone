@@ -1,9 +1,10 @@
 import {BaseComponent} from '../../core/BaseComponent';
 import {Card} from '../card/Card';
 import {dom} from '../../core/DOM';
-import {isValidTitle, sendRequest} from '../../helpers';
-import {listToHTML} from '../../html';
+import {sendRequest, isValidTitle, getIDNum} from '../../helpers';
+// import {listToHTML} from '../../html';
 import {getOnDragover} from '../../drag-n-drop';
+import {createModal} from '../../plugins/modal';
 
 export class List extends BaseComponent {
   constructor(options) {
@@ -91,27 +92,47 @@ export class List extends BaseComponent {
 
   async create(title) {
     // create in DB
-    const body = {
-      board: 1,
-      title: title,
-    }
-    const url = `boards/1/lists/`
-    const createdList = await sendRequest('POST', url, body)
+    // const body = {
+    //   board: 1,
+    //   title: title,
+    // }
+    // const url = `boards/1/lists/`
+    // const createdList = await sendRequest('POST', url, body)
 
     // create in DOM
-    const newList = HTMLToNode(listToHTML(createdList))
+    // const newList = HTMLToNode(listToHTML(createdList))
     // const lists = document.querySelectorAll('.list')
     // addListEvents(newList, lists)
-    newList.querySelector('.add-card-btn').addEventListener('click', this.showNewListTitleInput)
+    // newList.querySelector('.add-card-btn').addEventListener('click', this.showNewListTitleInput)
 
-    return newList
+    // return newList
   }
 
   // listener's methods
   onClick(event) {
-    if (event.target.classList.contains('add-card-btn')) {
+    const cardNode = dom.findParentNodeWithTheClass(event.target, 'card', this.rootNode)
+    const isAddCardBtn = event.target.classList.contains('add-card-btn')
+    const isOptions = event.target.classList.contains('list__options')
+
+    if (cardNode) {
+      const cardID = getIDNum(cardNode.id)
+      const listID = getIDNum(this.rootNode.id)
+      showCardModal(listID, cardID)
+    } else if (isAddCardBtn) {
       const listBody = this.rootNode.querySelector('.list__body')
       this.showNewListTitleInput(listBody)
+    } else if (isOptions) {
+      const settingsContainer = event.target.parentNode
+      if (settingsContainer.children.length === 1) {
+        showSettingsModal(event, settingsContainer)
+      } else {
+        const modalNode = event.target.parentNode.querySelector('.list-settings-modal')
+        // remove all event listeners
+        const modalClone = modalNode.cloneNode(true)
+        modalNode.parentNode.replaceChild(modalClone, modalNode)
+        // remove from DOM
+        modalClone.parentNode.removeChild(modalClone)
+      }
     }
   }
 
@@ -132,3 +153,33 @@ export class List extends BaseComponent {
     this.rootNode.classList.remove('dragging-list')
   }
 }
+
+
+// Modals
+async function showCardModal(listID, cardID) {
+  const url = `boards/1/lists/${listID}/cards/${cardID}/`
+  const card = await sendRequest('GET', url)
+  const options = {
+    type: 'card',
+    card: card,
+  }
+  createModal(options)
+}
+
+
+function showSettingsModal(e, settingsContainer) {
+  const listNode = e.target.parentNode.parentNode.parentNode
+  const listID = getIDNum(listNode.id)
+  const options = {
+    type: 'listSettings',
+    listID: listID,
+    container: settingsContainer,
+  }
+  createModal(options)
+}
+
+/* TODO:
+* save dropped list in position (update db)
+* save dropped card in list (update db): delete from one list + add copy to another
+* copy list +- (fix marks & checklists copying)
+**/
