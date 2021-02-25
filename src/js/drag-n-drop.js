@@ -1,18 +1,22 @@
-import {getIDNum} from './helpers';
+// returns formula to calculate offset depending on axis
+const _getOffset = (position, axis, rect) => {
+  if (axis === 'x') return position.x - rect.left - rect.width / 2
+  else return position.y - rect.top - rect.height / 2
+}
 
-
-// Drag & Drop for cards
-export function getBeforeCard(container, y) {
+// returns node to insert dragging element before
+export function getBeforeNode(position, container, axis, elementCls, draggingCls) {
   const notDraggingElements = [
-    ...container.querySelectorAll('.card:not(.dragging)'),
+    ...container.querySelectorAll(`${elementCls}:not(${draggingCls})`),
   ]
-
-  const reducer = (closest, containerChild) => {
-    const containerChildRect = containerChild.getBoundingClientRect()
-    const offset = y - containerChildRect.top - containerChildRect.height / 2
+  const reducer = (closest, child) => {
+    const containerChildRect = child.getBoundingClientRect()
+    const offset = _getOffset(position, axis, containerChildRect)
     if (offset < 0 && offset > closest.offset) {
-      return {offset: offset, element: containerChild}
-    } else return closest
+      return {offset: offset, element: child}
+    } else {
+      return closest
+    }
   }
 
   return notDraggingElements.reduce(
@@ -20,56 +24,15 @@ export function getBeforeCard(container, y) {
   ).element
 }
 
-
-export function onOverList(e) {
-  e.preventDefault() // enable drop event
-  const beforeElement = getBeforeCard(this, e.clientY)
-  const dragging = document.querySelector('.dragging')
-  if (beforeElement === null) this.childNodes[3].appendChild(dragging)
-  else this.childNodes[3].insertBefore(dragging, beforeElement)
-}
-
-
-export function cardOnDragStart(e) {
-  e.stopPropagation()
-  const board = document.querySelector('.board')
-  board.removeEventListener('dragover', onOverBoard);
-  this.classList.add('dragging')
-}
-
-
-export function cardOnDragEnd(e) {
-  e.stopPropagation()
-  const board = document.querySelector('.board')
-  board.addEventListener('dragover', onOverBoard)
-  this.classList.remove('dragging')
-}
-
-
-// Drag & Drop for lists
-export function getBeforeList(board, x) {
-  const notDraggingElements = [
-    ...board.querySelectorAll('.list:not(.dragging-list)'),
-  ]
-  const reducer = (closest, boardChild) => {
-    const boardChildRect = boardChild.getBoundingClientRect()
-    const offset = x - boardChildRect.left - boardChildRect.width / 2
-    if (offset < 0 && offset > closest.offset) {
-      return {offset: offset, element: boardChild}
-    } else return closest
+// returns enclosed function for BoardBody and List dragover events
+export function getOnDragover(getContainer, axis, cls, draggingCls) {
+  return (event) => {
+    event.preventDefault() // enable drop event
+    const position = {x: event.clientX, y: event.clientY}
+    // container is a child node that appears in render() after object initialization
+    const container = getContainer()
+    const beforeNode = getBeforeNode(position, container, axis, cls, draggingCls)
+    const dragging = document.querySelector(draggingCls)
+    container.insertBefore(dragging, beforeNode)
   }
-
-  return notDraggingElements.reduce(
-      reducer, {offset: Number.NEGATIVE_INFINITY}
-  ).element
-}
-
-
-export function onOverBoard(e) {
-  e.preventDefault() // enable drop event
-  const beforeList = getBeforeList(this, e.clientX)
-  const dragging = document.querySelector('.dragging-list')
-  const addListBlock = document.querySelector('.add-list-block')
-  if (beforeList === undefined) this.insertBefore(dragging, addListBlock)
-  else this.insertBefore(dragging, beforeList)
 }

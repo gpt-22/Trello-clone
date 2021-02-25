@@ -3,9 +3,9 @@ import {
   getOptionModalInnerHTML,
   createCardInDOM,
   createListInDOM,
-  deleteFromDOMbyID, HTMLToNode,
 } from '../html';
 import {sendRequest, getIDNum} from '../helpers';
+import {deleteFromDOMbyID, HTMLToNode} from '../core/DOM';
 
 
 async function createMark(listID, cardID, color) {
