@@ -19,6 +19,9 @@ export class BoardBody extends BaseComponent {
     this.rootNode.append(listsRootNode)
 
     const data = {}
+    // sort lists by position
+    this.data.lists = this.data.lists.sort((l1, l2) => (l1.position > l2.position) ? 1 : -1)
+
     this.data.lists.forEach((list, idx) => {
       data[idx] = list
       data[idx]['rootNode'] = listsRootNode

@@ -4,9 +4,10 @@ export function dom() {
   return new DOM()
 }
 
-dom.get = (selector, all=false) => {
-  if (all) return document.querySelectorAll(selector)
-  else return document.querySelector(selector)
+dom.get = (selector, all=false, rootNode=null) => {
+  const node = rootNode || document
+  if (all) return node.querySelectorAll(selector)
+  else return node.querySelector(selector)
 }
 
 dom.create = (tagName, id='', classes='', attrs={}) => {
@@ -35,8 +36,8 @@ dom.HTMLToNode = (HTML) => {
 
 // returns node that has class if it or one of its parents has the class classname
 // rootNode is an end search point
-dom.findParentNodeWithTheClass = (node, classname, rootNode) => {
+dom.findParentNodeWithTheClass = (node, classname, rootNode=null) => {
   if (node.className.split(' ').indexOf(classname)>=0) return node
-  if (node === rootNode) return false
+  if (rootNode && node === rootNode) return false
   return dom.findParentNodeWithTheClass(node.parentNode, classname, rootNode)
 }

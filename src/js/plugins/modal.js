@@ -3,9 +3,9 @@ import {
   getOptionModalInnerHTML,
   createCardInDOM,
   createListInDOM,
-} from '../html';
+} from './modal.html';
 import {sendRequest, getIDNum} from '../helpers';
-import {deleteFromDOMbyID, HTMLToNode} from '../core/DOM';
+import {dom} from '../core/DOM';
 
 
 async function createMark(listID, cardID, color) {
@@ -28,7 +28,7 @@ async function createMark(listID, cardID, color) {
   const card = document.querySelector('#card' + cardID)
   const marksContainer = card.querySelector('.card-marks-container')
   const markHTML = `<div class="card-mark-color ${color}"></div>`
-  marksContainer.append(HTMLToNode(markHTML))
+  marksContainer.append(dom.HTMLToNode(markHTML))
 
   // add checked element +
   const marksModal = document.querySelector('.marks-modal')

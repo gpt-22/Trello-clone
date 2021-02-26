@@ -2,7 +2,6 @@ import {BaseComponent} from '../../core/BaseComponent';
 import {Card} from '../card/Card';
 import {dom} from '../../core/DOM';
 import {sendRequest, isValidTitle, getIDNum} from '../../helpers';
-// import {listToHTML} from '../../html';
 import {getOnDragover} from '../../drag-n-drop';
 import {createModal} from '../../plugins/modal';
 
@@ -24,13 +23,56 @@ export class List extends BaseComponent {
   init() {
     super.init()
     this.on('List:dragstart', () => this.removeListener('dragover'))
-    this.on('List:dragend', () => this.addListener('dragover'))
+    this.on('List:dragend', () => {
+      this.addListener('dragover')
+
+      const newPosition = Array
+          .from(dom.get('.list', true))
+          .map((list) => getIDNum(list.id))
+          .indexOf(this.data.id)
+
+      const body = {position: newPosition}
+      const url = `boards/1/lists/${this.data.id}/`
+      sendRequest('PATCH', url, body).catch((err) => console.log(err))
+
+      this.data.position = newPosition
+    })
+    this.on(
+        'Card:dragend',
+        async (fromListComponent, toListComponent, cardComponent) => {
+          const isSameList = fromListComponent === toListComponent
+          if (!isSameList && this.data.id === fromListComponent.data.id) {
+            this.components = this.components.filter((component) => component !== cardComponent)
+          } else if (!isSameList && this.data.id === toListComponent.data.id) {
+            this.components.push(cardComponent)
+            this.data.cards.push(cardComponent.data)
+            const cards = fromListComponent.data.cards
+            fromListComponent.data.cards = cards.filter((card) => card !== cardComponent.data)
+          }
+          // change card positions
+          const cardsNodes = this.rootNode.querySelectorAll('.card')
+          const cardsIDs = Array.from(cardsNodes).map((cardNode) => getIDNum(cardNode.id))
+          await this.components.forEach((component) => {
+            const newPosition = cardsIDs.indexOf(component.data.id)
+            // in DB
+            const body = {position: newPosition}
+            const url = `boards/1/lists/${this.data.id}/cards/${component.data.id}/`
+            sendRequest('PATCH', url, body)
+                .catch((err) => console.log('change pos:', err))
+            // in component
+            component.data.position = newPosition
+          })
+
+          this.sortCardsByPosition()
+        })
   }
 
-  render() {
-    this.rootNode.innerHTML = this.toHTML(this.data)
+  render(isFirstRender=true) {
+    if (isFirstRender) this.rootNode.innerHTML = this.toHTML(this.data)
     const data = {}
-    this.data['cards'].forEach((card, idx) => {
+    this.sortCardsByPosition()
+
+    this.data.cards.forEach((card, idx) => {
       data[idx] = card
       this.components.push(Card)
     })
@@ -56,6 +98,12 @@ export class List extends BaseComponent {
     `
   }
 
+  sortCardsByPosition() {
+    this.data.cards = this.data.cards.sort((l1, l2) => {
+      return (l1.position > l2.position) ? 1 : -1
+    })
+  }
+
   showNewListTitleInput(listBody) {
     const textArea = dom.create(
         'textarea',
@@ -66,17 +114,13 @@ export class List extends BaseComponent {
           'rows': 3,
         }
     )
-
-    textArea.addEventListener('keyup', (e) => {
-      (e.key === 13) ? textArea.blur() : {}
-    })
-
+    textArea.addEventListener('keyup', (e) => (e.key === 13) ? textArea.blur() : {})
     textArea.addEventListener('blur', () => {
       // addCardOrHideTextArea
       const listBody = textArea.parentNode
       const title = textArea.value
       if (isValidTitle(title)) {
-        // rewrite
+        // TODO: write card creation
         // createCard(e, title, listBody, this).then( () => {
         //   this.value = ''
         //   this.focus()
@@ -99,7 +143,7 @@ export class List extends BaseComponent {
     // const url = `boards/1/lists/`
     // const createdList = await sendRequest('POST', url, body)
 
-    // create in DOM
+    // create component
     // const newList = HTMLToNode(listToHTML(createdList))
     // const lists = document.querySelectorAll('.list')
     // addListEvents(newList, lists)
@@ -179,7 +223,6 @@ function showSettingsModal(e, settingsContainer) {
 }
 
 /* TODO:
-* save dropped list in position (update db)
 * save dropped card in list (update db): delete from one list + add copy to another
 * copy list +- (fix marks & checklists copying)
 **/

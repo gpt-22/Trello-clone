@@ -3,6 +3,7 @@ import {DOMListener} from './DOMListener';
 export class BaseComponent extends DOMListener {
   constructor(rootNode, options={}) {
     super(rootNode, options.listeners)
+    this.parentComponent = options.parentComponent || null
     this.eventDispatcher = options.eventDispatcher
     this.components = 'components' in options ? options.components : []
     this.data = 'data' in options ? options.data : []
@@ -10,6 +11,8 @@ export class BaseComponent extends DOMListener {
   }
 
   init() {
+    // TODO: this method must be called only once -> rewrite usages
+    // add component and child components events
     this.addListeners()
     this.components.forEach((component) => component.init())
   }
@@ -26,9 +29,18 @@ export class BaseComponent extends DOMListener {
   }
 
   destroy() {
+    // remove component event listeners, event subscriptions and node from DOM
+    // save for child components
     this.removeListeners()
     this.unsubscribers.forEach((unsub) => unsub())
-    this.components.forEach((component) => component.destroy())
+    this.destroyInnerComponents()
+    this.rootNode.parentNode.removeChild(this.rootNode)
+  }
+
+  destroyInnerComponents() {
+    this.components.forEach((component) => {
+      component.destroy()
+    })
   }
 
   render() {
@@ -40,6 +52,7 @@ export class BaseComponent extends DOMListener {
   renderInnerComponents(data, rootNode=null) {
     this.components = this.components.map((ComponentClass, idx) => {
       const componentOptions = {
+        parentComponent: this,
         eventDispatcher: this.eventDispatcher,
         data: data[idx],
       }
