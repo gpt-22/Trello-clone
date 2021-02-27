@@ -127,7 +127,6 @@ export class List extends BaseComponent {
           textArea.value = ''
           textArea.focus()
         })
-        console.log('card must be created')
       } else listBody.removeChild(textArea)
       listBody.scrollTop = listBody.scrollHeight
     })

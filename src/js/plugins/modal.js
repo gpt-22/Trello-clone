@@ -1,12 +1,9 @@
 import {
   getCardModalInnerHTML,
   getOptionModalInnerHTML,
-  createCardInDOM,
-  createListInDOM,
 } from './modal.html';
 import {sendRequest, getIDNum} from '../helpers';
 import {dom} from '../core/DOM';
-
 
 async function createMark(listID, cardID, color) {
   // create mark in db +
@@ -417,29 +414,20 @@ export const createModal = function(options) {
   const modalNode = _createModalNode(options, modalObj)
 
   modalNode.addEventListener('click', (e) => {
-        (e.target.dataset.close === 'true') ? modalObj.close(e) : ''
+    (e.target.dataset.close === 'true') ? modalObj.close(e) : ''
   })
-  // as DOM operation are async we need to use setTimeout to see animation open
+  // as DOM operation are async we need to use setTimeout to see opening animation
   setTimeout( () => modalObj.open(), 0)
 
   return modalObj
 }
 
-// modal -> overlay -> container -> header / body / footer
-// modal -> container -> header / body / footer
 // options:
 // * type
 // * overlay
 // * animateOpenClose
 
-// create modal node & insert modal in DOM
-// add modal event listeners
-
 /* TODO
-* marks modal styles +
-* fix marks modal closing +
-* add mark on modal, on card, in db +
-* remove mark from modal, from card, from db +
 * checklist modal
 * checklist progress bar
 * add checklist
@@ -454,4 +442,3 @@ export const createModal = function(options) {
 * delete card modal +
 * mark card as done
 * */
-
