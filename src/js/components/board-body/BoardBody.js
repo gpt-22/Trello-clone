@@ -27,6 +27,7 @@ export class BoardBody extends BaseComponent {
       data[idx]['rootNode'] = listsRootNode
       this.components.push(List)
     })
+    // data for addListBlock component
     const dataKeys = [...Object.keys(data).map((key) => parseInt(key))]
     data[dataKeys.length] = {}
     this.components.push(AddListBlock)

@@ -134,24 +134,6 @@ export class List extends BaseComponent {
     listBody.scrollTop = listBody.scrollHeight
   }
 
-  async create(title) {
-    // create in DB
-    // const body = {
-    //   board: 1,
-    //   title: title,
-    // }
-    // const url = `boards/1/lists/`
-    // const createdList = await sendRequest('POST', url, body)
-
-    // create component
-    // const newList = HTMLToNode(listToHTML(createdList))
-    // const lists = document.querySelectorAll('.list')
-    // addListEvents(newList, lists)
-    // newList.querySelector('.add-card-btn').addEventListener('click', this.showNewListTitleInput)
-
-    // return newList
-  }
-
   // listener's methods
   onClick(event) {
     const cardNode = dom.findParentNodeWithTheClass(event.target, 'card', this.rootNode)

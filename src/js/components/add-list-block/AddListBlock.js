@@ -1,6 +1,7 @@
 import {BaseComponent} from '../../core/BaseComponent'
+import {List} from '../list/List';
 import {dom} from '../../core/DOM';
-import {isValidTitle} from '../../helpers';
+import {isValidTitle, sendRequest} from '../../helpers';
 
 export class AddListBlock extends BaseComponent {
   constructor(options) {
@@ -56,16 +57,46 @@ export class AddListBlock extends BaseComponent {
     addListForm.style.display = 'none'
   }
 
-  async addListOrHide() {
+  addListOrHide() {
     const formInput = this.rootNode.querySelector('.add-list-input')
     if (isValidTitle(formInput.value)) {
-      // const newList = await createList(formInput.value)
-      // const board = document.querySelector('.board')
-      // board.insertBefore(newList, this.rootNode)
-      // board.scrollLeft = board.scrollWidth
+      const title = formInput.value
+      this.createList(title)
+          .then((resp) => console.log(resp))
       formInput.value = ''
       formInput.focus()
     }
+  }
+
+  async createList(title) {
+    const boardBody = this.parentComponent
+    const position = Math.max(...boardBody.data.lists.map((list) => list.position)) + 1
+
+    // create in DB
+    const body = {
+      board: 1,
+      title: title,
+      position: position,
+    }
+    const url = `boards/1/lists/`
+    const createdList = await sendRequest('POST', url, body)
+
+    // add list data to listBody data
+    const listsRootNode = dom.get(
+        '.board__lists-container',
+        false,
+        boardBody.rootNode
+    )
+    const listData = {0: {...createdList, 'rootNode': listsRootNode}}
+    this.parentComponent.data.lists.push(createdList)
+
+    // add list component to listBody component
+    const newList = boardBody.renderInnerComponent(List, listData, 0)
+    const idx = boardBody.components.length - 1
+    boardBody.components.splice(idx, 0, newList)
+    newList.init()
+
+    boardBody.rootNode.scrollLeft = boardBody.rootNode.scrollWidth
   }
 
   // listener's methods
@@ -76,7 +107,7 @@ export class AddListBlock extends BaseComponent {
     if (event.target.classList.contains('show-form-btn')) {
       this.show()
     } else if (event.target.classList.contains('add-list-btn')) {
-      this.addListOrHide().then((r) => r)
+      this.addListOrHide()
     } else if (event.target.classList.contains('add-list-cancel-btn')) {
       this.hide()
     }
