@@ -61,16 +61,16 @@ export class AddListBlock extends BaseComponent {
     const formInput = this.rootNode.querySelector('.add-list-input')
     if (isValidTitle(formInput.value)) {
       const title = formInput.value
-      this.createList(title)
-          .then((resp) => console.log(resp))
+      this.createList(title).catch((error) => console.log(error))
       formInput.value = ''
       formInput.focus()
     }
   }
 
+  getNewListPosition = () => this.parentComponent.data.lists.length
+
   async createList(title) {
-    const boardBody = this.parentComponent
-    const position = Math.max(...boardBody.data.lists.map((list) => list.position)) + 1
+    const position = this.getNewListPosition()
 
     // create in DB
     const body = {
@@ -81,16 +81,17 @@ export class AddListBlock extends BaseComponent {
     const url = `boards/1/lists/`
     const createdList = await sendRequest('POST', url, body)
 
-    // add list data to listBody data
+    // add list data to boardBody data
+    const boardBody = this.parentComponent
     const listsRootNode = dom.get(
         '.board__lists-container',
         false,
         boardBody.rootNode
     )
     const listData = {0: {...createdList, 'rootNode': listsRootNode}}
-    this.parentComponent.data.lists.push(createdList)
+    boardBody.data.lists.push(createdList)
 
-    // add list component to listBody component
+    // add list component to boardBody components
     const newList = boardBody.renderInnerComponent(List, listData, 0)
     const idx = boardBody.components.length - 1
     boardBody.components.splice(idx, 0, newList)
@@ -104,12 +105,8 @@ export class AddListBlock extends BaseComponent {
     const formInput = this.rootNode.querySelector('.add-list-input')
     formInput.focus()
 
-    if (event.target.classList.contains('show-form-btn')) {
-      this.show()
-    } else if (event.target.classList.contains('add-list-btn')) {
-      this.addListOrHide()
-    } else if (event.target.classList.contains('add-list-cancel-btn')) {
-      this.hide()
-    }
+    if (event.target.classList.contains('show-form-btn')) this.show()
+    else if (event.target.classList.contains('add-list-btn')) this.addListOrHide()
+    else if (event.target.classList.contains('add-list-cancel-btn')) this.hide()
   }
 }

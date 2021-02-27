@@ -67,13 +67,15 @@ export class List extends BaseComponent {
         })
   }
 
-  render(isFirstRender=true) {
-    if (isFirstRender) this.rootNode.innerHTML = this.toHTML(this.data)
-    const data = {}
+  render() {
+    this.rootNode.innerHTML = this.toHTML(this.data)
     this.sortCardsByPosition()
+    const cardsContainerNode = dom.get('.list__cards-container', false, this.rootNode)
+    const data = {}
 
     this.data.cards.forEach((card, idx) => {
       data[idx] = card
+      data[idx]['rootNode'] = cardsContainerNode
       this.components.push(Card)
     })
     const listBody = this.rootNode.querySelector('.list__body')
@@ -89,6 +91,7 @@ export class List extends BaseComponent {
             </div>
         </div>
         <div class="list__body">
+            <div class="list__cards-container"></div>
         </div>
         <div class="list__footer">
             <button class="add-card-btn">
@@ -114,17 +117,17 @@ export class List extends BaseComponent {
           'rows': 3,
         }
     )
-    textArea.addEventListener('keyup', (e) => (e.key === 13) ? textArea.blur() : {})
+    textArea.addEventListener('keyup', (e) => e.key === 'Enter' ? textArea.blur() : {})
     textArea.addEventListener('blur', () => {
       // addCardOrHideTextArea
       const listBody = textArea.parentNode
       const title = textArea.value
       if (isValidTitle(title)) {
-        // TODO: write card creation
-        // createCard(e, title, listBody, this).then( () => {
-        //   this.value = ''
-        //   this.focus()
-        // })
+        this.createCard(title).then( () => {
+          textArea.value = ''
+          textArea.focus()
+        })
+        console.log('card must be created')
       } else listBody.removeChild(textArea)
       listBody.scrollTop = listBody.scrollHeight
     })
@@ -132,6 +135,35 @@ export class List extends BaseComponent {
     listBody.appendChild(textArea)
     textArea.focus()
     listBody.scrollTop = listBody.scrollHeight
+  }
+
+  getNewCardPosition = () => this.data.cards.length
+
+  async createCard(title) {
+    const position = this.getNewCardPosition()
+
+    // create in DB
+    const body = {
+      list: this.data.id,
+      title: title,
+      position: position,
+    }
+    const url = `boards/1/lists/${this.data.id}/cards/`
+    const createdCard = await sendRequest('POST', url, body)
+
+    // add card data to list component data
+    const cardsContainerNode = dom.get('.list__cards-container', false, this.rootNode)
+    const cardData = {0: {...createdCard, 'rootNode': cardsContainerNode}}
+    this.data.cards.push(createdCard)
+
+    // add list component to listBody component
+    const newCard = this.renderInnerComponent(Card, cardData, 0)
+    // const idx = this.components.length - 1
+    this.components.push(newCard)
+    newCard.init()
+
+    const listBodyNode = dom.get('.list__body', false, this.rootNode)
+    listBodyNode.scrollTop = listBodyNode.scrollHeight
   }
 
   // listener's methods
@@ -163,7 +195,7 @@ export class List extends BaseComponent {
   }
 
   onDragover = getOnDragover(
-      () => this.rootNode.querySelector('.list__body'),
+      () => dom.get('.list__cards-container', false, this.rootNode),
       'y',
       '.card',
       '.dragging'
@@ -204,7 +236,4 @@ function showSettingsModal(e, settingsContainer) {
   createModal(options)
 }
 
-/* TODO:
-* save dropped card in list (update db): delete from one list + add copy to another
-* copy list +- (fix marks & checklists copying)
-**/
+/* TODO: copy list +- (fix marks & checklists copying) */

@@ -15,8 +15,8 @@ export class BoardBody extends BaseComponent {
   }
 
   render() {
-    const listsRootNode = dom.create('div', '', 'board__lists-container')
-    this.rootNode.append(listsRootNode)
+    const listsContainerNode = dom.create('div', '', 'board__lists-container')
+    this.rootNode.append(listsContainerNode)
 
     const data = {}
     // sort lists by position
@@ -24,7 +24,7 @@ export class BoardBody extends BaseComponent {
 
     this.data.lists.forEach((list, idx) => {
       data[idx] = list
-      data[idx]['rootNode'] = listsRootNode
+      data[idx]['rootNode'] = listsContainerNode
       this.components.push(List)
     })
     // data for addListBlock component

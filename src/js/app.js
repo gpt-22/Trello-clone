@@ -28,6 +28,4 @@ const main = async () => {
 
 main().catch((err) => console.log(err))
 
-/* TODO:
-* fix eslint with 'no-invalid-this'
-**/
+/* TODO: fix eslint with 'no-invalid-this' */
