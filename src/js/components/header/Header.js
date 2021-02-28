@@ -16,6 +16,10 @@ export class Header extends BaseComponent {
   }
 
   toHTML() {
-    return ``
+    return `
+      <a href="#dashboard/" class="header__home-btn default">
+          <img src="img/home.svg" alt="" class="header__home-icon">
+      </a>
+    `
   }
 }
