@@ -1,8 +1,8 @@
 import './../less/theme.less'
 import {sendRequest} from './helpers'
-import {App} from './components/app/App';
-import {Header} from './components/header/Header';
-import {Board} from './components/board/Board';
+import {DashboardPage} from './pages/DashboardPage';
+import {BoardPage} from './pages/BoardPage';
+import {App} from './core/App';
 
 
 const main = async () => {
@@ -12,17 +12,13 @@ const main = async () => {
   }).then((data) => {
     localStorage.setItem('refreshToken', data['refresh'])
     localStorage.setItem('accessToken', data['access'])
-    return sendRequest('GET', 'boards/1/')
-  }).then((board) => {
-    const app = new App('#app', {
-      components: [Header, Board],
-      data: {
-        0: {},
-        1: board,
+
+    new App('#app', {
+      routes: {
+        'dashboard': DashboardPage,
+        'board': BoardPage,
       },
     })
-
-    app.render()
   })
 }
 
