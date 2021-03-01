@@ -1,4 +1,6 @@
 ![alt text](preview1.jpg)
+![alt text](preview2.jpg)
+![alt text](preview3.jpg)
 
 # Project setup (Windows):
 * `git clone https://github.com/IncomprehensibleGuy/trello-clone.git`
